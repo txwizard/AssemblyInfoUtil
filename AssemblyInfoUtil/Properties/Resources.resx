@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MSG_AWAIT_CARBON_UNIT" xml:space="preserve">
+    <value>Please press Return to fully stop the program.</value>
+    <comment>The AwaitCarbonUnit method displays this message, then executes a ReadLine, causing it to wait for a carriage return.</comment>
+  </data>
+  <data name="MSG_COPYRIGHT_YEAR_CHANGE" xml:space="preserve">
+    <value>{2}Copyright Year Changed: Old Value = {0}{2}                        New Value = {1}{2}</value>
+  </data>
+  <data name="MSG_COPYRIGHT_YEAR_IS_SINGLE_YEAR" xml:space="preserve">
+    <value>{1}The copyright year is a single year: {0}{1}</value>
+  </data>
+  <data name="MSG_COPYRIGHT_YEAR_UNCHANGED" xml:space="preserve">
+    <value>{1}Copyright Year Unchanged: Current Value = {0}{1}</value>
+  </data>
+  <data name="MSG_ERR_RUNTIME" xml:space="preserve">
+    <value>{5}An {0} exception arose.{5}    Message   : {1}{5}    TargetSite: {2}{5}    Source    : {3}{5}    StackTrace: {4}{5}</value>
+    <comment>The command line argument parser in the entry point routine format a message from this template to report a runtime exception arising.</comment>
+  </data>
+  <data name="MSG_FILE_NOT_FOUND" xml:space="preserve">
+    <value>Error: Can not find file {0}</value>
+    <comment>The command line argument parser in the entry point routine format a message from this template to report that the specified input file cannot be found.</comment>
+  </data>
+  <data name="MSG_INCREMENT_MUST_BE_NUMERIC" xml:space="preserve">
+    <value>Error: Increment value must be numeric.{1}       Specified value = {0}{1}</value>
+    <comment>The command line argument parser in the entry point routine format a message from this template to report a non-integral version part ordinal.</comment>
+  </data>
+  <data name="MSG_INCREMENT_OUT_OF_RANGE" xml:space="preserve">
+    <value>Error: Increment value must be between {0} and {1}.{3}       Specified value = {2}{3}</value>
+    <comment>The command line argument parser in the entry point routine format a message from this template to report an out-of-range version part ordinal.</comment>
+  </data>
+  <data name="MSG_INVALID_VERSION_SUBSTRING" xml:space="preserve">
+    <value>Error: The version substring at position {0} is invalid.{2}       Version substring = {1}{2}</value>
+    <comment>The command line argument parser in the entry point routine formats a message from this template to report an invalid version number substring.</comment>
+  </data>
+  <data name="MSG_NEW_VERSION_STRING" xml:space="preserve">
+    <value>Replacing {0} version string {1} with {2}</value>
+    <comment>The main processing routine formats and displays a message based on this template when the -set switch is specified.</comment>
+  </data>
+  <data name="MSG_NO_FILENAME" xml:space="preserve">
+    <value>Error: You must specify the name of the file to process.{0}</value>
+    <comment>The command line argument parser in the entry point routine formats a message from this template to report that the input file name was omitted from the command line.</comment>
+  </data>
+  <data name="MSG_PROCESSING_BEGIN" xml:space="preserve">
+    <value>Processing {0}:</value>
+    <comment>The main processing routine displays this message as it begins processing the input file.</comment>
+  </data>
+  <data name="MSG_PROCESSING_DONE" xml:space="preserve">
+    <value>Done!</value>
+    <comment>The main processing routine displays this message as it finished processing the input file.</comment>
+  </data>
+  <data name="MSG_PROJECT_IS_UNCHANGED" xml:space="preserve">
+    <value>{0}Since the project is unchanged, AssemblyInfo.cs remains unchanged and unexamined.{0}</value>
+  </data>
+  <data name="MSG_SOURCE_UNCHANGED" xml:space="preserve">
+    <value>{0}Since the project is unchanged, AssemblyInfo.cs remains unchanged and unexamined.{0}</value>
+  </data>
+  <data name="MSG_START" xml:space="preserve">
+    <value>{0}, version {1}.{2},{5}{3} ({4} UTC){5}</value>
+    <comment>The CreateStartupBanner method formats its message from this template.</comment>
+  </data>
+  <data name="MSG_STOP" xml:space="preserve">
+    <value>{4}{0} Done, {1} ({2} UTC){4}Running time = {3}</value>
+    <comment>The CreateShutdownBanner method formats its message from this template.</comment>
+  </data>
+  <data name="MSG_UPDATING_ANSWER_COPYRIGHT_YEAR" xml:space="preserve">
+    <value>Updating the Copyright year if needed</value>
+    <comment>The main routine displays this message when the -cy switch is present in the command line.</comment>
+  </data>
+  <data name="MSG_UPDATING_ASMFVER" xml:space="preserve">
+    <value>Updating AssemblyFileVersion</value>
+    <comment>The main processing routine displays this message when the -fv switch is specified or both version selection switches are omitted.</comment>
+  </data>
+  <data name="MSG_UPDATING_ASMVER" xml:space="preserve">
+    <value>Updating AssemblyVersion</value>
+    <comment>The main processing routine displays this message when the -av switch is specified or both version selection switches are omitted.</comment>
+  </data>
+  <data name="MSG_UPDATING_ASMVER_AND_ASMFVER" xml:space="preserve">
+    <value>Updating both AssemblyVersion and AssemblyFileVersion</value>
+    <comment>The main processing routine displays this message when both -av and -fv switches are either specified or both version selection switches are omitted.</comment>
+  </data>
+  <data name="MSG_USAGE_1" xml:space="preserve">
+    <value>Usage: AssemblyInfoUtil &lt;path to AssemblyInfo.cs or AssemblyInfo.vb file&gt; [options]{0}</value>
+    <comment>This is the first of eight strings that static method DisplayHelpAndSetStatusCode in Program.cs uses to render a help message in response to an invalid command line.</comment>
+  </data>
+  <data name="MSG_USAGE_2" xml:space="preserve">
+    <value>Options: {0}&lt;new version number&gt; - set new version number (in NN.NN.NN.NN format)</value>
+    <comment>This is the second of eight strings that static method DisplayHelpAndSetStatusCode in Program.cs uses to render a help message in response to an invalid command line.</comment>
+  </data>
+  <data name="MSG_USAGE_3" xml:space="preserve">
+    <value>         {0}&lt;parameter index&gt;    - increases the parameter with specified index (can be from 1 to 4).</value>
+    <comment>This is the third of eight strings that static method DisplayHelpAndSetStatusCode in Program.cs uses to render a help message in response to an invalid command line.</comment>
+  </data>
+  <data name="MSG_USAGE_4" xml:space="preserve">
+    <value>         {0}                       - Set the AssemblyVersion, leaving AssemblyFileVersion as is.</value>
+    <comment>This is the fourth of eight strings that static method DisplayHelpAndSetStatusCode in Program.cs uses to render a help message in response to an invalid command line.</comment>
+  </data>
+  <data name="MSG_USAGE_5" xml:space="preserve">
+    <value>         {0}                       - Set the AssemblyFileVersion, leaving AssemblyVersion as is.</value>
+    <comment>This is the fifth of eight strings that static method DisplayHelpAndSetStatusCode in Program.cs uses to render a help message in response to an invalid command line.</comment>
+  </data>
+  <data name="MSG_USAGE_6" xml:space="preserve">
+    <value>{0}                     - Update the copyright year when hyphenated.</value>
+    <comment>This is the sixth of eight strings that static method DisplayHelpAndSetStatusCode in Program.cs uses to render a help message in response to an invalid command line.</comment>
+  </data>
+  <data name="MSG_USAGE_7" xml:space="preserve">
+    <value>         {0}                     - Do nothing unless at least one file is newer than AssemblyInfo.cs or has its Archive flag set.</value>
+    <comment>This is the seventh of eight strings that static method DisplayHelpAndSetStatusCode in Program.cs uses to render a help message in response to an invalid command line.</comment>
+  </data>
+  <data name="MSG_USAGE_8" xml:space="preserve">
+    <value>        {0}                     - Stop and await RETURN key when done.</value>
+    <comment>This is the eigth of eight strings that static method DisplayHelpAndSetStatusCode in Program.cs uses to render a help message in response to an invalid command line.</comment>
+  </data>
+  <data name="MSG_VERSION_CHANGE" xml:space="preserve">
+    <value>{2}FileVersion Changed: Old Value = {0}{2}                     New Value = {1}{2}</value>
+  </data>
+  <data name="MSG_VERSION_STRING_PART_INCR" xml:space="preserve">
+    <value>Incrementing {0} version string part {1} ({2}) from {3} to {4}, new version = {5}</value>
+    <comment>The main processing routine formats and displays a message based on this template when the -inc switch is specified.</comment>
+  </data>
+  <data name="MSG_VERSION_UNCHANGED" xml:space="preserve">
+    <value>{1}FileVersion Unchanged:    Current Value = {0}{1}</value>
+  </data>
+  <data name="TEMP_FILENAME_EXTENSION" xml:space="preserve">
+    <value>.out</value>
+    <comment>The main processing routine appends this extension to the input file to create a copy for output, to avoid overwriting the input file until it is completely replaced.</comment>
+  </data>
+</root>

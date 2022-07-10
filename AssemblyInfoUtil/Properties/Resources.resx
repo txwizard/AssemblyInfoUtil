@@ -120,14 +120,29 @@
   <data name="ERRMSG_VERSION_STRING_PARTS_COUNT" xml:space="preserve">
     <value>{4}The format of the version string fed into method {0} is invalid.{4}    The expected number of version substrings is {1}.{4}    The actual number of substrings is {2}.{4}    The version string is {3}.{4}</value>
   </data>
+  <data name="IDS_ASSEMBLYCOPYRIGHT" xml:space="preserve">
+    <value>AssemblyCopyright</value>
+  </data>
+  <data name="IDS_ASSEMBLYFILEVERSION_PREFIX" xml:space="preserve">
+    <value>[assembly: AssemblyFileVersion</value>
+  </data>
+  <data name="IDS_ASSEMBLYINFORMATIONALVERSION_PREFIX" xml:space="preserve">
+    <value>[assembly: AssemblyInformationalVersion</value>
+  </data>
   <data name="IDS_ASSEMBLYINFORMATIONALVERSION_TEMPLATE" xml:space="preserve">
     <value>[assembly: AssemblyInformationalVersion ( {0} )]</value>
   </data>
+  <data name="IDS_ASSEMBLYVERSION_PREFIX" xml:space="preserve">
+    <value>[assembly: AssemblyVersion</value>
+  </data>
+  <data name="IDS_COPYRIGHT" xml:space="preserve">
+    <value>Copyright</value>
+  </data>
   <data name="MSG_ASSEMBLYINFORMATIONALVERSION_ADDED" xml:space="preserve">
-    <value>AssemblyInformationalVersion added: {0}</value>
+    <value>AssemblyInformationalVersion added: {0}{1}</value>
   </data>
   <data name="MSG_ASSEMBLYINFORMATIONALVERSION_UPDATED" xml:space="preserve">
-    <value>AssemblyInformationalVersion updateded: {0}</value>
+    <value>AssemblyInformationalVersion updateded: {0}{1}</value>
   </data>
   <data name="MSG_AWAIT_CARBON_UNIT" xml:space="preserve">
     <value>Please press Return to fully stop the program.</value>

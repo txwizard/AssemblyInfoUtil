@@ -7,6 +7,14 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
+## 2022/07/10, Version 3.4
+
+1. Fix a bug that prevented existing AssemblyInformationalVersion being updated,
+causing instead a duplicate string to be inserted, which resulted in a fatal
+syntax error on the next build.
+
+2. Move most of the remaining hard coded strings into the string table.
+
 ## 2022/07/09, Version 3.3
 
 Implement Support for AssemblyInformationalVersion.

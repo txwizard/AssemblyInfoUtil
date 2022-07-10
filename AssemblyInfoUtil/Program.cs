@@ -98,6 +98,10 @@
                           or the other is skipped.
 
     2022/07/09 3.3     DG Implement Support for AssemblyInformationalVersion.
+
+    2022/07/10 3.4     DG Fix a bug that prevented AssemblyInformationalVersion
+                          updating correctly, and move most of the remaining
+                          strings from Program.cs to the string table.
     ============================================================================
 */
 
@@ -197,17 +201,14 @@ namespace AssemblyInfoUtil
         /// </returns>
         private static string CheckCopyrightYear ( string pstrLineIn )
         {
-            const string ATTRIBUTE_NAME = @"AssemblyCopyright";
-            const string COPYRIGHT_STRING = @"Copyright";
-
             if ( string.IsNullOrWhiteSpace ( pstrLineIn ) )
             {
                 return SpecialStrings.EMPTY_STRING;
             }   // TRUE (degenerate case) block, if ( string.IsNullOrWhiteSpace ( pstrLineIn ) )
             else
             {
-                int intPosAttributeName = pstrLineIn.IndexOf ( ATTRIBUTE_NAME );
-                int intPosCopyrightString = pstrLineIn.IndexOf ( COPYRIGHT_STRING );
+                int intPosAttributeName = pstrLineIn.IndexOf ( Properties.Resources.IDS_ASSEMBLYCOPYRIGHT );
+                int intPosCopyrightString = pstrLineIn.IndexOf ( Properties.Resources.IDS_COPYRIGHT );
 
                 if ( intPosAttributeName > ListInfo.INDEXOF_NOT_FOUND && intPosCopyrightString > intPosAttributeName )
                 {
@@ -337,14 +338,16 @@ namespace AssemblyInfoUtil
                     plstAssemblyInfoLines [ s_AssemblyInformationalVersionIndex ] = strSemVerString;
                     Console.WriteLine (
                         Properties.Resources.MSG_ASSEMBLYINFORMATIONALVERSION_UPDATED ,
-                        strSemVerString );
+                        strSemVerString ,
+                        Environment.NewLine );
                 }   // TRUE (An InformationalVersion attribute exists; update it.) block, if ( s_AssemblyInformationalVersionIndex > ArrayInfo.ARRAY_INVALID_INDEX )
                 else
                 {
                     plstAssemblyInfoLines.Add ( strSemVerString );
                     Console.WriteLine (
                         Properties.Resources.MSG_ASSEMBLYINFORMATIONALVERSION_ADDED ,
-                        strSemVerString );
+                        strSemVerString ,
+                        Environment.NewLine );
                 }   // FALSE (The InformationalVersion attribute is absent; create it.) block, if ( s_AssemblyInformationalVersionIndex > ArrayInfo.ARRAY_INVALID_INDEX )
             }   // if ( !string.IsNullOrEmpty ( s_CurrentFileVersionString ) )
         }   // private static void HandleAssemblyInformationalVersion
@@ -444,7 +447,7 @@ namespace AssemblyInfoUtil
             {
                 string strCurrArgLC = pastrArgs [ i ].ToLower ( );
 
-                if ( strCurrArgLC.StartsWith ( CMD_INCREMENT_VERSION_PART ) )
+                if ( strCurrArgLC.StartsWith ( CMD_INCREMENT_VERSION_PART , StringComparison.CurrentCultureIgnoreCase ) )
                 {
                     string strArgSubstring = pastrArgs [ i ].Substring ( CMD_INCREMENT_VERSION_PART.Length );
 
@@ -466,18 +469,18 @@ namespace AssemblyInfoUtil
                     else
                     {
                         Console.WriteLine (
-                            Properties.Resources.MSG_INCREMENT_MUST_BE_NUMERIC ,
-                            strArgSubstring.QuoteString ( ) ,                   // Format Item 0:        Specified value = {0}
+                            Properties.Resources.MSG_INCREMENT_MUST_BE_NUMERIC ,// Format control string
+                            strArgSubstring.QuoteString ( ) ,                   // Format Item 0: Specified value = {0}
                             Environment.NewLine );                              // Format Item 1: Error: Increment value must be numeric.{1}
                         DisplayHelpAndSetStatusCode ( ERR_INCREMENT_MUST_BE_NUMERIC );
 
                         return false;
                     }   // FALSE (unanticipated outcome) block, if ( int.TryParse ( strArgSubstring , out s_incParamNum ) )
-                }   // if ( strCurrArgLC.StartsWith ( CMD_INCREMENT_VERSION_PART ) )
-                else if ( strCurrArgLC.StartsWith ( CMD_SET_VERSION ) )
+                }   // if ( strCurrArgLC.StartsWith ( CMD_INCREMENT_VERSION_PART , StringComparison.CurrentCultureIgnoreCase ) )
+                else if ( strCurrArgLC.StartsWith ( CMD_SET_VERSION , StringComparison.CurrentCultureIgnoreCase ) )
                 {
                     s_VersionStr = pastrArgs [ i ].Substring ( CMD_SET_VERSION.Length );
-                }   // else if ( strCurrArgLC.StartsWith ( CMD_SET_VERSION ) )
+                }   // else if ( strCurrArgLC.StartsWith ( CMD_SET_VERSION , StringComparison.CurrentCultureIgnoreCase ) )
                 else if ( strCurrArgLC.Equals ( CMD_FIX_ASSEMBLYVERSION ) )
                 {
                     s_FixAssemblyVersion = true;
@@ -501,7 +504,7 @@ namespace AssemblyInfoUtil
                 else
                 {
                     s_InputFileName = pastrArgs [ i ];
-                }   // FALSE block, else if ( args [ i ].StartsWith ( CMD_SET_VERSION ) )
+                }   // FALSE block, else if ( strCurrArgLC.Equals ( CMD_STOP_WHEN_DONE ) )
             }   // for ( int i = ArrayInfo.ARRAY_FIRST_ELEMENT ; i < pastrArgs.Length ; i++ )
 
             if ( s_InputFileName == SpecialStrings.EMPTY_STRING )
@@ -659,22 +662,15 @@ namespace AssemblyInfoUtil
                         {
                             rstrLineOut = ProcessLinePart (
                                 strCurrentLine ,
-                                @"<Assembly: AssemblyVersion" );
+                                Properties.Resources.IDS_ASSEMBLYVERSION_PREFIX );
                         }   // if ( s_FixAssemblyVersion )
 
                         if ( s_isLineUnChanged && s_FixAssemblyFileVersion )
                         {   // The previous call to ProcessLinePart left the line as is.
                             rstrLineOut = ProcessLinePart (
                                 strCurrentLine ,
-                                @"<Assembly: AssemblyFileVersion" );
+                                Properties.Resources.IDS_ASSEMBLYFILEVERSION_PREFIX );
                         }   // if ( s_isLineUnChanged && s_FixFileVersion )
-
-                        if ( s_isLineUnChanged && s_AssemblyInformationalVersionIndex == ArrayInfo.ARRAY_INVALID_INDEX )
-                        {   // The previous call to ProcessLinePart left the line as is. If it's an AssemblyInformationalVersion, save the line number.
-                            s_AssemblyInformationalVersionIndex = strCurrentLine.StartsWith ( @"<Assembly: AssemblyInformationalVersion" )
-                                ? pintLineNumber
-                                : ArrayInfo.ARRAY_INVALID_INDEX;
-                        }   // if ( s_isLineUnChanged && s_AssemblyInformationalVersionIndex == ArrayInfo.ARRAY_INVALID_INDEX )
                     }   // FALSE (Process the current line.) block, if ( pstrLineIn.StartsWith ( VB_LINE_COMMENT ) )
                 }   // TRUE block, if ( s_isVB )
                 else
@@ -689,7 +685,7 @@ namespace AssemblyInfoUtil
                         {
                             rstrLineOut = ProcessLinePart (
                                 strCurrentLine ,
-                                @"[assembly: AssemblyVersion" );
+                                Properties.Resources.IDS_ASSEMBLYVERSION_PREFIX );
                         }   // if ( s_FixAssemblyVersion )
 
                         if ( s_isLineUnChanged )
@@ -698,11 +694,18 @@ namespace AssemblyInfoUtil
                             {
                                 rstrLineOut = ProcessLinePart (
                                     strCurrentLine ,
-                                    @"[assembly: AssemblyFileVersion" );
+                                    Properties.Resources.IDS_ASSEMBLYFILEVERSION_PREFIX );
                             }   // if ( s_FixFileVersion )
                         }   // if ( s_isLineUnChanged )
                     }   // FALSE (Process the current line.) block, if ( pstrLineIn.StartsWith ( CS_LINE_COMMENT ) )
                 }   // FALSE block, if ( s_isVB )
+
+                if ( s_AssemblyInformationalVersionIndex == ArrayInfo.ARRAY_INVALID_INDEX )
+                {   // It's cheaper to inspect every line than it is to risk missing the AssemblyInformationalVersion attribute.
+                    s_AssemblyInformationalVersionIndex = strCurrentLine.StartsWith ( Properties.Resources.IDS_ASSEMBLYINFORMATIONALVERSION_PREFIX , StringComparison.CurrentCultureIgnoreCase ) == true
+                        ? pintLineNumber
+                        : ArrayInfo.ARRAY_INVALID_INDEX;
+                }   // if ( s_AssemblyInformationalVersionIndex == ArrayInfo.ARRAY_INVALID_INDEX )
             }   // TRUE (normal case) block, if ( pstrLineIn.Length > ListInfo.EMPTY_STRING_LENGTH )
 
             if ( rstrLineOut == null )
@@ -746,9 +749,9 @@ namespace AssemblyInfoUtil
             string pstrLineIn ,
             string pstrLinePart )
         {
-            const char VERSION_STRING_DELIMITER = '.';
+            const char VERSION_STRING_DELIMITER = SpecialCharacters.FULL_STOP;
 
-            const string VERSION_PART_WILDCARD = @"*";
+            const string VERSION_PART_WILDCARD = SpecialStrings.ASTERISK;
 
             int spos = pstrLineIn.IndexOf ( pstrLinePart );
 

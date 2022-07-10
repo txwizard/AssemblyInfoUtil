@@ -70,6 +70,33 @@ namespace AssemblyInfoUtil.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AssemblyCopyright.
+        /// </summary>
+        internal static string IDS_ASSEMBLYCOPYRIGHT {
+            get {
+                return ResourceManager.GetString("IDS_ASSEMBLYCOPYRIGHT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [assembly: AssemblyFileVersion.
+        /// </summary>
+        internal static string IDS_ASSEMBLYFILEVERSION_PREFIX {
+            get {
+                return ResourceManager.GetString("IDS_ASSEMBLYFILEVERSION_PREFIX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [assembly: AssemblyInformationalVersion.
+        /// </summary>
+        internal static string IDS_ASSEMBLYINFORMATIONALVERSION_PREFIX {
+            get {
+                return ResourceManager.GetString("IDS_ASSEMBLYINFORMATIONALVERSION_PREFIX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [assembly: AssemblyInformationalVersion ( {0} )].
         /// </summary>
         internal static string IDS_ASSEMBLYINFORMATIONALVERSION_TEMPLATE {
@@ -79,7 +106,25 @@ namespace AssemblyInfoUtil.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AssemblyInformationalVersion added: {0}.
+        ///   Looks up a localized string similar to [assembly: AssemblyVersion.
+        /// </summary>
+        internal static string IDS_ASSEMBLYVERSION_PREFIX {
+            get {
+                return ResourceManager.GetString("IDS_ASSEMBLYVERSION_PREFIX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copyright.
+        /// </summary>
+        internal static string IDS_COPYRIGHT {
+            get {
+                return ResourceManager.GetString("IDS_COPYRIGHT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AssemblyInformationalVersion added: {0}{1}.
         /// </summary>
         internal static string MSG_ASSEMBLYINFORMATIONALVERSION_ADDED {
             get {
@@ -88,7 +133,7 @@ namespace AssemblyInfoUtil.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AssemblyInformationalVersion updateded: {0}.
+        ///   Looks up a localized string similar to AssemblyInformationalVersion updateded: {0}{1}.
         /// </summary>
         internal static string MSG_ASSEMBLYINFORMATIONALVERSION_UPDATED {
             get {

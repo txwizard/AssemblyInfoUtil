@@ -10,10 +10,36 @@
     Synopsis:           This command line utility appends the modified date to
                         the base name of the file specified in its command line.
 
-    Remarks:            This class module implements the Program class, which is
-                        composed exclusively of the static void Main method,
-                        which is functionally equivalent to the main() routine
-                        of a standard C program.
+    Remarks:            AssemblyInformationalVersion is an assembly attribute
+                        that is used only by NuGet. Since the NuGet versioning
+                        convention is SemVer, the AssemblyInformationalVersion
+                        is a three-part version string, and the fourth part may
+                        be, and often is, a string that is used to designate a
+                        beta or other pre-release package.
+
+                        In the interest of maximum flexibility, this program
+                        behaves as follows with respect to this assembly
+                        attribute.
+
+                        1)  When AssemblyInformationalVersion exists, its first
+                            three substrings, all of which must be numeric, are
+                            updated to match the corresponding values in the
+                            AssemblyFileVersion attribute when it is updated.
+
+                        2)  When the AssemblyInformationalVersion attribute is
+                            missing, it is added and set to the Semantic Version
+                            per the AssemblyFileVersion attribute.
+
+                        3)  When the AssemblyFileVersion remains unchanged, so
+                            does the AssemblyInformationalVersion. Moreover, the
+                            program dispenses with checking for its presence
+                            unless the AssemblyFileVersion attribute is being
+                            updated.
+
+                        This class module implements the Program class, which is
+                        composed of the static void Main method, its sole public
+                        method, and all of its dependent routines, so that the
+                        entire assembly is implemented as a single static class.
 
     Author:             David A. Gray, after Sergiy Korzh
 
@@ -70,11 +96,14 @@
     2022/06/19 3.2     DG Display details about changes made to the version and
                           copyright notice attributes, including notes when one
                           or the other is skipped.
+
+    2022/07/09 3.3     DG Implement Support for AssemblyInformationalVersion.
     ============================================================================
 */
 
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -108,11 +137,14 @@ namespace AssemblyInfoUtil
         private static int s_incParamNum = MagicNumbers.ZERO;
 
         private static string s_InputFileName = SpecialStrings.EMPTY_STRING;
-        private static string s_OutputFileName;
-        private static string s_versionStr = null;
+        private static string s_OutputFileName = SpecialStrings.EMPTY_STRING;
+        private static string s_VersionStr = null;
+        private static string s_CurrentFileVersionString = null;
+
+        private static int s_AssemblyInformationalVersionIndex = ArrayInfo.ARRAY_INVALID_INDEX;
 
         private static bool s_FixAssemblyVersion = false;
-        private static bool s_FixFileVersion = false;
+        private static bool s_FixAssemblyFileVersion = false;
         private static bool s_FixCopyrightYear = false;
         private static bool s_OnlyWhenModified = false;
         private static bool s_StopWhenDone = false;
@@ -275,6 +307,120 @@ namespace AssemblyInfoUtil
 
 
         /// <summary>
+        /// <para>
+        /// Do whatever is needed to implement AssemblyInformationalVersion.
+        /// </para>
+        /// <para>
+        /// If one exists and the FileVersion string was updated, update it with
+        /// the new FileVersion string.
+        /// </para>
+        /// <para>
+        /// If there isn't one yet and an updated FileVersion string exists,
+        /// create it and initialize it with the current FileVersion string.
+        /// </para>
+        /// </summary>
+        /// <param name="plstAssemblyInfoLines">
+        /// Like the routine that calls it, this routine needs to see the whole
+        /// list of assembly attributes.
+        /// </param>
+        private static void HandleAssemblyInformationalVersion ( List<string> plstAssemblyInfoLines )
+        {
+            if ( !string.IsNullOrEmpty ( s_CurrentFileVersionString ) )
+            {   // Have version. Check for InformationalVersion
+                string strSemVerString = String.Format (
+                    Properties.Resources.IDS_ASSEMBLYINFORMATIONALVERSION_TEMPLATE ,
+                    SemVerStringFromFileVersionString (
+                        s_CurrentFileVersionString ).QuoteString ( ) );
+
+                if ( s_AssemblyInformationalVersionIndex > ArrayInfo.ARRAY_INVALID_INDEX )
+                {
+                    plstAssemblyInfoLines [ s_AssemblyInformationalVersionIndex ] = strSemVerString;
+                    Console.WriteLine (
+                        Properties.Resources.MSG_ASSEMBLYINFORMATIONALVERSION_UPDATED ,
+                        strSemVerString );
+                }   // TRUE (An InformationalVersion attribute exists; update it.) block, if ( s_AssemblyInformationalVersionIndex > ArrayInfo.ARRAY_INVALID_INDEX )
+                else
+                {
+                    plstAssemblyInfoLines.Add ( strSemVerString );
+                    Console.WriteLine (
+                        Properties.Resources.MSG_ASSEMBLYINFORMATIONALVERSION_ADDED ,
+                        strSemVerString );
+                }   // FALSE (The InformationalVersion attribute is absent; create it.) block, if ( s_AssemblyInformationalVersionIndex > ArrayInfo.ARRAY_INVALID_INDEX )
+            }   // if ( !string.IsNullOrEmpty ( s_CurrentFileVersionString ) )
+        }   // private static void HandleAssemblyInformationalVersion
+
+
+        /// <summary>
+        /// Evaluate the s_OnlyWhenModified flag, which is TRUE when command
+        /// line argument -onlywhenmodified is present. When it is, return TRUE
+        /// only when at least one file in the directory that contains the
+        /// AssemblyInfo.cs file specified in the command line or its immediate
+        /// parent is newer than AssemblyInfo.cs or has its Archive flag set.
+        /// </summary>
+        /// <returns>
+        /// See summary.
+        /// </returns>
+        private static bool OK2Proceed ( )
+        {
+            if ( s_OnlyWhenModified )
+            {
+                FileInfo fiAssemblyInfo = new FileInfo ( s_InputFileName );
+                DateTime dtmAssemblyInfoModDate = fiAssemblyInfo.LastWriteTimeUtc;
+                DirectoryInfo diAssemblyInfoHome = fiAssemblyInfo.Directory;
+                FileInfo [ ] files = diAssemblyInfoHome.GetFiles ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
+
+                //  ------------------------------------------------------------
+                //  Check the files in the directory that contains AssemblyInfo
+                //  for newer files or files that have their Archive flag set.
+                //  Return True when either condition obtains.
+                //  ------------------------------------------------------------
+
+                for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
+                          intJ < files.Length ;
+                          intJ++ )
+                {
+                    if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+                    {   // Stop when we find one modified file.
+                        return true;
+                    }   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+                }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < files.Length ; intJ++ )
+
+                //  ------------------------------------------------------------
+                //  Check the files in the immediate parent of the directory
+                //  that contains AssemblyInfo for newer files or files that
+                //  have their Archive flag set. Return True when either
+                //  condition obtains.
+                //  ------------------------------------------------------------
+
+                DirectoryInfo diAssemblyInfoParent = diAssemblyInfoHome.Parent;
+                files = diAssemblyInfoParent.GetFiles ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
+
+                for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
+                          intJ < files.Length ;
+                          intJ++ )
+                {
+                    if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+                    {   // Stop when we find one modified file.
+                        return true;
+                    }   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+                }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < files.Length ; intJ++ )
+
+                //  ------------------------------------------------------------
+                //  If processing reaches this point, NONE of the files in the
+                //  directory that contains the specified AssemblyInfo.cs or its
+                //  parent directory meets the conditions for processing.
+                //  ------------------------------------------------------------
+
+                return false;
+            }   // TRUE (The switch to suppress processing unless files are changed is ENabled.) block, if ( s_OnlyWhenModified )
+            else
+            {
+                return true;
+            }   // FALSE (The switch to suppress processing unless files are changed is DISabled.) block, if ( s_OnlyWhenModified )
+        }   // private static bool OK2Proceed
+
+
+        /// <summary>
         /// Parse the command line arguments received by the calling main
         /// routine, storing their values in class-scoped static members.
         /// </summary>
@@ -313,6 +459,7 @@ namespace AssemblyInfoUtil
                                 s_incParamNum ,                                 // Format Item 2: Specified value = {2}
                                 Environment.NewLine );                          // Format Item 3: {3}       Specified
                             DisplayHelpAndSetStatusCode ( ERR_INCREMENT_OUT_OF_RANGE );
+
                             return false;
                         }   // if ( s_incParamNum < VER_PART_MIN_VALUE || s_incParamNum > VER_PART_MAX_VALUE )
                     }   // TRUE (anticipated outcome) block, if ( int.TryParse ( strArgSubstring , out s_incParamNum ) )
@@ -323,12 +470,13 @@ namespace AssemblyInfoUtil
                             strArgSubstring.QuoteString ( ) ,                   // Format Item 0:        Specified value = {0}
                             Environment.NewLine );                              // Format Item 1: Error: Increment value must be numeric.{1}
                         DisplayHelpAndSetStatusCode ( ERR_INCREMENT_MUST_BE_NUMERIC );
+
                         return false;
                     }   // FALSE (unanticipated outcome) block, if ( int.TryParse ( strArgSubstring , out s_incParamNum ) )
                 }   // if ( strCurrArgLC.StartsWith ( CMD_INCREMENT_VERSION_PART ) )
                 else if ( strCurrArgLC.StartsWith ( CMD_SET_VERSION ) )
                 {
-                    s_versionStr = pastrArgs [ i ].Substring ( CMD_SET_VERSION.Length );
+                    s_VersionStr = pastrArgs [ i ].Substring ( CMD_SET_VERSION.Length );
                 }   // else if ( strCurrArgLC.StartsWith ( CMD_SET_VERSION ) )
                 else if ( strCurrArgLC.Equals ( CMD_FIX_ASSEMBLYVERSION ) )
                 {
@@ -336,7 +484,7 @@ namespace AssemblyInfoUtil
                 }   // else if ( strCurrArgLC.Equals ( CMD_FIX_ASSEMBLYVERSION ) )
                 else if ( strCurrArgLC.Equals ( CMD_FIX_FILEVERSION ) )
                 {
-                    s_FixFileVersion = true;
+                    s_FixAssemblyFileVersion = true;
                 }   // else if ( strCurrArgLC.Equals ( CMD_FIX_FILEVERSION ) )
                 else if ( strCurrArgLC.Equals ( CMD_COPYRIGHT_YEAR ) )
                 {
@@ -362,6 +510,7 @@ namespace AssemblyInfoUtil
                     Properties.Resources.MSG_NO_FILENAME ,                      // Format control string
                     Environment.NewLine );                                      // Format Item 0: Error: You must specify the name of the file to process.{0}
                 DisplayHelpAndSetStatusCode ( ERR_NO_FILENAME );
+
                 return false;
             }   // if ( s_InputFileName == SpecialStrings.EMPTY_STRING )
 
@@ -371,6 +520,7 @@ namespace AssemblyInfoUtil
                     s_InputFileName ,
                     Properties.Resources.TEMP_FILENAME_EXTENSION );
                 ReportSettings ( );
+
                 return true;
             }   // TRUE (anticpated outcome) block, if ( File.Exists ( s_InputFileName ) )
             else
@@ -379,79 +529,10 @@ namespace AssemblyInfoUtil
                     Properties.Resources.MSG_FILE_NOT_FOUND ,
                     s_InputFileName.QuoteString ( ) );                          // Format control string
                 DisplayHelpAndSetStatusCode ( ERR_FILE_NOT_FOUND );             // Format Item 0: Can not find file {0}
+
                 return false;
             }   // FALSE (unanticpated outcome) block, if ( File.Exists ( s_InputFileName ) )
         }   // private static void ParseCommandLineArgs
-
-
-        /// <summary>
-        /// Evaluate the s_OnlyWhenModified flag, which is TRUE when command
-        /// line argument -onlywhenmodified is present. When it is, return TRUE
-        /// only when at least one file in the directory that contains the
-        /// AssemblyInfo.cs file specified in the command line or its immediate
-        /// parent is newer than AssemblyInfo.cs or has its Archive flag set.
-        /// </summary>
-        /// <returns>
-        /// See summary.
-        /// </returns>
-        private static bool OK2Proceed ( )
-        {
-            if ( s_OnlyWhenModified )
-            {
-                FileInfo fiAssemblyInfo = new FileInfo ( s_InputFileName );
-                DateTime dtmAssemblyInfoModDate = fiAssemblyInfo.LastWriteTimeUtc;
-                DirectoryInfo diAssemblyInfoHome = fiAssemblyInfo.Directory;
-                FileInfo [ ] files = diAssemblyInfoHome.GetFiles ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
-
-                //  ------------------------------------------------------------
-                //  Check the files in the directory that contains AssemblyInfo
-                //  for newer files or files that have their Archive flag set.
-                //  Return True when either condition obtains.
-                //  ------------------------------------------------------------
-
-                for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
-                          intJ < files.Length ;
-                          intJ++ )
-                {
-                    if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
-                    {
-                        return true;
-                    }
-                }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < files.Length ; intJ++ )
-
-                //  ------------------------------------------------------------
-                //  Check the files in the immediate parent of the directory
-                //  that contains AssemblyInfo for newer files or files that
-                //  have their Archive flag set. Return True when either
-                //  condition obtains.
-                //  ------------------------------------------------------------
-
-                DirectoryInfo diAssemblyInfoParent = diAssemblyInfoHome.Parent;
-                files = diAssemblyInfoParent.GetFiles ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
-
-                for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
-                          intJ < files.Length ;
-                          intJ++ )
-                {
-                    if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
-                    {
-                        return true;
-                    }
-                }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < files.Length ; intJ++ )
-
-                //  ------------------------------------------------------------
-                //  If processing reaches this point, NONE of the files in the
-                //  directory that contains the specified AssemblyInfo.cs or its
-                //  parent directory meets the conditions for processing.
-                //  ------------------------------------------------------------
-
-                return false;
-            }   // TRUE (The switch to suppress processing unless files are changed is ENabled.) block, if ( s_OnlyWhenModified )
-            else
-            {
-                return true;
-            }   // FALSE (The switch to suppress processing unless files are changed is DISabled.) block, if ( s_OnlyWhenModified )
-        }   // private static bool
 
 
         /// <summary>
@@ -463,30 +544,34 @@ namespace AssemblyInfoUtil
         {
             const int STACKTRACE_LEADING_SPACES = 16;
 
-            StreamReader reader = null;
-            StreamWriter writer = null;
-
             try
             {
                 if ( OK2Proceed ( ) )
                 {   // s_OnlyWhenModified == true and at least one file is modified.
-                    reader = new StreamReader ( s_InputFileName );
-                    writer = new StreamWriter ( s_OutputFileName );
+                    // Reading the lines into a list instead of an array permits appending a line to the list.
+                    List<string> lstAssemblyInfoLines = new List<string> ( File.ReadAllLines ( s_InputFileName ) );
 
                     if ( Path.GetExtension ( s_InputFileName ).ToLower ( ) == @".vb" )
                     {   // C# and VB AssemblyVersion file syntax differ slightly.
                         s_isVB = true;
                     }   // if ( Path.GetExtension ( s_fileName ).ToLower ( ) == @".vb" )
 
-                    string line;    // This cannot be declared inline.
+                    int intNLines = lstAssemblyInfoLines.Count;                 // Stashing the count in a local scalar eliminates querying the List object on every iteration of the ensuing FOR loop.
 
-                    while ( ( line = reader.ReadLine ( ) ) != null )
-                    {   // Each line is processed or skipped. Regardless, each line goes into a new file.
-                        writer.WriteLine ( ProcessLine ( line ) );
-                    }   // while ( ( line = reader.ReadLine ( ) ) != null )
+                    for ( int intCurrentLine = ArrayInfo.ARRAY_FIRST_ELEMENT ;
+                              intCurrentLine < intNLines ;
+                              intCurrentLine++ )
+                    {   // Each line is processed or skipped. Regardless, each line goes back into the array.
+                        lstAssemblyInfoLines [ intCurrentLine ] = ProcessLine (
+                            lstAssemblyInfoLines ,
+                            intCurrentLine );
+                    }   // for ( int intCurrentLine = ArrayInfo.ARRAY_FIRST_ELEMENT ; intCurrentLine < intNLines ; intCurrentLine++ )
 
-                    reader.Close ( );
-                    writer.Close ( );
+                    HandleAssemblyInformationalVersion ( lstAssemblyInfoLines );
+
+                    File.WriteAllLines (
+                        s_OutputFileName ,
+                        lstAssemblyInfoLines.ToArray ( ) );
 
                     FileInfo fiInputFile = new FileInfo ( s_InputFileName );
                     FileAttributes enmInputFileAttributss = fiInputFile.Attributes;
@@ -525,34 +610,6 @@ namespace AssemblyInfoUtil
                     } );
                 Environment.ExitCode = ERR_RUNTIME;
             }   // Catch block
-            finally
-            {
-                if ( writer != null )
-                {
-                    if ( writer.BaseStream != null )
-                    {   // Closing a stream sets its BaseStream to null.
-                        if ( writer.BaseStream.CanWrite )
-                        {   // If you can write to the BaseStream, the file is open, and should be closed.
-                            writer.Close ( );
-                        }   // if ( writer.BaseStream.CanWrite )
-                    }   // if ( writer.BaseStream != null )
-
-                    writer.Dispose ( );
-                }   // if ( writer != null )
-
-                if ( reader != null )
-                {
-                    if ( reader.BaseStream != null )
-                    {   // Closing a stream sets its BaseStream to null.
-                        if ( reader.BaseStream.CanRead )
-                        {   // If you can read from the BaseStream, the file is open, and should be closed.
-                            reader.Close ( );
-                        }   // if ( reader.BaseStream.CanRead )
-                    }   // if ( reader.BaseStream != null )
-
-                    reader.Dispose ( );
-                }   // if ( reader != null )
-            }   // Finally block
 
             Console.WriteLine ( Properties.Resources.MSG_PROCESSING_DONE.PadLeft ( LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
         }   // private static void PerformTask
@@ -561,70 +618,86 @@ namespace AssemblyInfoUtil
         /// <summary>
         /// This method is called once for each line in the input AssemblyInfo.
         /// </summary>
-        /// <param name="pstrLineIn">
-        /// This argument accepts a string that contains the text of the current
-        /// line in the input file.
+        /// <param name="plstAssemblyInfoAttributes">
+        /// This argument receives a reference to the generic List of strings
+        /// that holds the contents of the AsseemblyInfo file.
+        /// </param>
+        /// <param name="pintLineNumber">
+        /// This argument receives a copy of the current indes into the
+        /// <paramref name="plstAssemblyInfoAttributes"/> List of assembly
+        /// attribute strings.
         /// </param>
         /// <returns>
         /// The return value is the input string, modified as dictated by its
         /// contents and the object-scoped static members that are set according
         /// to the command line arguments.
         /// </returns>
-        private static string ProcessLine ( string pstrLineIn )
+        private static string ProcessLine (
+            List<string> plstAssemblyInfoAttributes ,
+            int pintLineNumber )
         {
             const string CS_LINE_COMMENT = @"//";
             const string VB_LINE_COMMENT = @"'";
 
+            string strCurrentLine = plstAssemblyInfoAttributes [ pintLineNumber ];
+
             string rstrLineOut = null;
 
-            if ( pstrLineIn.Length > ListInfo.EMPTY_STRING_LENGTH )
+            if ( strCurrentLine.Length > ListInfo.EMPTY_STRING_LENGTH )
             {
                 s_isLineUnChanged = true;
 
                 if ( s_isVB )
                 {   // The input file belongs to a Visual Basic project.
-                    if ( pstrLineIn.StartsWith ( VB_LINE_COMMENT ) )
+                    if ( strCurrentLine.StartsWith ( VB_LINE_COMMENT ) )
                     {   // Comment lines are preserved as is.
-                        rstrLineOut = pstrLineIn;
+                        rstrLineOut = strCurrentLine;
                     }   // TRUE (The current line is a comment. Skip processing, but keep it.) block, if ( pstrLineIn.StartsWith ( VB_LINE_COMMENT ) )
                     else
                     {   // The line is valid source code.
                         if ( s_FixAssemblyVersion )
                         {
                             rstrLineOut = ProcessLinePart (
-                                pstrLineIn ,
+                                strCurrentLine ,
                                 @"<Assembly: AssemblyVersion" );
                         }   // if ( s_FixAssemblyVersion )
 
-                        if ( s_isLineUnChanged && s_FixFileVersion )
-                        {   // The previous call to ProcessLinePart fully processed the line.
+                        if ( s_isLineUnChanged && s_FixAssemblyFileVersion )
+                        {   // The previous call to ProcessLinePart left the line as is.
                             rstrLineOut = ProcessLinePart (
-                                pstrLineIn ,
+                                strCurrentLine ,
                                 @"<Assembly: AssemblyFileVersion" );
                         }   // if ( s_isLineUnChanged && s_FixFileVersion )
+
+                        if ( s_isLineUnChanged && s_AssemblyInformationalVersionIndex == ArrayInfo.ARRAY_INVALID_INDEX )
+                        {   // The previous call to ProcessLinePart left the line as is. If it's an AssemblyInformationalVersion, save the line number.
+                            s_AssemblyInformationalVersionIndex = strCurrentLine.StartsWith ( @"<Assembly: AssemblyInformationalVersion" )
+                                ? pintLineNumber
+                                : ArrayInfo.ARRAY_INVALID_INDEX;
+                        }   // if ( s_isLineUnChanged && s_AssemblyInformationalVersionIndex == ArrayInfo.ARRAY_INVALID_INDEX )
                     }   // FALSE (Process the current line.) block, if ( pstrLineIn.StartsWith ( VB_LINE_COMMENT ) )
                 }   // TRUE block, if ( s_isVB )
                 else
                 {   // The input file belongs to a C# project.
-                    if ( pstrLineIn.StartsWith ( CS_LINE_COMMENT ) )
+                    if ( strCurrentLine.StartsWith ( CS_LINE_COMMENT ) )
                     {   // Comment lines are preserved as is.
-                        rstrLineOut = pstrLineIn;
+                        rstrLineOut = strCurrentLine;
                     }   // TRUE (The current line is a comment. Skip processing, but keep it.) block, if ( pstrLineIn.StartsWith ( CS_LINE_COMMENT ) )
                     else
                     {   // The line is valid source code.
                         if ( s_FixAssemblyVersion )
                         {
                             rstrLineOut = ProcessLinePart (
-                                pstrLineIn ,
+                                strCurrentLine ,
                                 @"[assembly: AssemblyVersion" );
                         }   // if ( s_FixAssemblyVersion )
 
                         if ( s_isLineUnChanged )
                         {   // The previous call to ProcessLinePart fully processed the line.
-                            if ( s_FixFileVersion )
+                            if ( s_FixAssemblyFileVersion )
                             {
                                 rstrLineOut = ProcessLinePart (
-                                    pstrLineIn ,
+                                    strCurrentLine ,
                                     @"[assembly: AssemblyFileVersion" );
                             }   // if ( s_FixFileVersion )
                         }   // if ( s_isLineUnChanged )
@@ -634,7 +707,7 @@ namespace AssemblyInfoUtil
 
             if ( rstrLineOut == null )
             {   // Return unchanged lines.
-                rstrLineOut = pstrLineIn;
+                rstrLineOut = strCurrentLine;
             }   // if ( rstrLineOut == null )
 
             return rstrLineOut;
@@ -669,7 +742,7 @@ namespace AssemblyInfoUtil
         /// independent task of fixing up the copyright year.
         /// </para>
         /// </returns>
-        private static string ProcessLinePart ( 
+        private static string ProcessLinePart (
             string pstrLineIn ,
             string pstrLinePart )
         {
@@ -729,9 +802,9 @@ namespace AssemblyInfoUtil
                         }   // FALSE (unanticipated outcome) block, if ( Int64.TryParse ( nums [ s_incParamNum - 1 ] , out long val ) )
                     }   // if ( nums.Length >= s_incParamNum && nums [ s_incParamNum - 1 ] != VERSION_PART_WILDCARD )
                 }   // if ( s_incParamNum > 0 )
-                else if ( s_versionStr != null )
+                else if ( s_VersionStr != null )
                 {   // Replace the whole version string.
-                    sbNewVersion = new StringBuilder ( s_versionStr );
+                    sbNewVersion = new StringBuilder ( s_VersionStr );
                     performChange = true;
                 }   // else if ( s_versionStr != null )
 
@@ -744,6 +817,7 @@ namespace AssemblyInfoUtil
                     sb.Insert (
                         spos ,
                         sbNewVersion );
+                    s_CurrentFileVersionString = sbNewVersion.ToString ( );
                     s_isLineUnChanged = false;
                     string strNewVersion = sb.ToString ( );
                     Console.WriteLine (
@@ -791,29 +865,97 @@ namespace AssemblyInfoUtil
                 Properties.Resources.MSG_PROCESSING_BEGIN ,                 // Format control string
                 s_InputFileName.QuoteString ( ) );                          // Format Item 0: Processing {0} ... 
 
-            if ( ( !s_FixAssemblyVersion ) && ( !s_FixFileVersion ) )
+            if ( ( !s_FixAssemblyVersion ) && ( !s_FixAssemblyFileVersion ) )
             {   // Fix both if neither is specified.
                 s_FixAssemblyVersion = true;
-                s_FixFileVersion = true;
-                Console.WriteLine ( Properties.Resources.MSG_UPDATING_ASMVER_AND_ASMFVER.PadLeft ( LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
+                s_FixAssemblyFileVersion = true;
+                Console.WriteLine (
+                    Properties.Resources.MSG_UPDATING_ASMVER_AND_ASMFVER.PadLeft (
+                        LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
             }   // if ( ( !s_FixAssemblyVersion ) && ( !s_FixFileVersion ) )
-            else if ( s_FixAssemblyVersion && s_FixFileVersion )
+            else if ( s_FixAssemblyVersion && s_FixAssemblyFileVersion )
             {   // Both are fixed when both are explicitly stated.
-                Console.WriteLine ( Properties.Resources.MSG_UPDATING_ASMVER_AND_ASMFVER.PadLeft ( LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
+                Console.WriteLine (
+                    Properties.Resources.MSG_UPDATING_ASMVER_AND_ASMFVER.PadLeft (
+                        LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
             }   // else if ( s_FixAssemblyVersion && s_FixFileVersion )
             else if ( s_FixAssemblyVersion )
             {   // Only the assembly version is
-                Console.WriteLine ( Properties.Resources.MSG_UPDATING_ASMVER.PadLeft ( LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
+                Console.WriteLine (
+                    Properties.Resources.MSG_UPDATING_ASMVER.PadLeft (
+                        LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
             }   // TRUE block, else if ( s_FixAssemblyVersion )
             else
             {
-                Console.WriteLine ( Properties.Resources.MSG_UPDATING_ASMFVER.PadLeft ( LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
+                Console.WriteLine (
+                    Properties.Resources.MSG_UPDATING_ASMFVER.PadLeft (
+                        LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
             }   // FALSE block, else if ( s_FixAssemblyVersion )
 
             if ( s_FixCopyrightYear )
             {   // The copyright year switch is independent of the others.
-                Console.WriteLine ( Properties.Resources.MSG_UPDATING_ANSWER_COPYRIGHT_YEAR.PadLeft ( LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
+                Console.WriteLine (
+                    Properties.Resources.MSG_UPDATING_ANSWER_COPYRIGHT_YEAR.PadLeft (
+                        LEFT_PADDING_FOR_SETTINGS_MESSAGES ) );
             }   // TRUE (The copyright year switch is set.) block, if ( s_FixCopyrightYear )
         }   // private static void ReportSettings
+
+
+        /// <summary>
+        /// Generate a Semantic Version (SemVer) version string from a 4-part
+        /// FileVersion string.
+        /// </summary>
+        /// <param name="pstrCurrentFileVersionString">
+        /// This string is a copy of the FileVersion string from which to derive
+        /// a SemVer string.
+        /// </param>
+        /// <returns>
+        /// The return value is a SemVer string.
+        /// </returns>
+        private static string SemVerStringFromFileVersionString ( string pstrCurrentFileVersionString )
+        {
+            const int EXPECTED_VERSION_SUBSTRING_COUNT = 4;
+            const int SEMVER_VERSION_SUBSTRING_COUNT = 3;
+            const char VERSION_SUBSTRING_DELIMITER = SpecialCharacters.FULL_STOP;
+
+            if ( !string.IsNullOrWhiteSpace ( pstrCurrentFileVersionString ) )
+            {
+                string [ ] astrVersionSubstrings = pstrCurrentFileVersionString.Split ( VERSION_SUBSTRING_DELIMITER );
+
+                if ( astrVersionSubstrings.Length == EXPECTED_VERSION_SUBSTRING_COUNT )
+                {
+                    StringBuilder sb = new StringBuilder ( MagicNumbers.CAPACITY_10 );
+
+                    for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
+                              intJ < SEMVER_VERSION_SUBSTRING_COUNT ;
+                              intJ++ )
+                    {
+                        if ( intJ > ArrayInfo.ARRAY_FIRST_ELEMENT )
+                        {
+                            sb.Append ( VERSION_SUBSTRING_DELIMITER );
+                        }   // if ( intJ > ArrayInfo.ARRAY_FIRST_ELEMENT )
+
+                        sb.Append ( astrVersionSubstrings [ intJ ] );
+                    }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < SEMVER_VERSION_SUBSTRING_COUNT ; intJ++ )
+
+                    return sb.ToString ( );
+                }   // TRUE (anticipated outcome) block, if ( astrVersionSubstrings.Length == EXPECTED_VERSION_SUBSTRING_COUNT )
+                else
+                {
+                    Console.Error.WriteLine (
+                        Properties.Resources.ERRMSG_VERSION_STRING_PARTS_COUNT ,// Format Control String
+                        System.Reflection.MethodBase.GetCurrentMethod ( ).Name ,// Format Item 0: The format of the version string fed into method {0}
+                        EXPECTED_VERSION_SUBSTRING_COUNT ,                      // Format Item 1: The expected number of version substrings is {1}.
+                        astrVersionSubstrings.Length ,                          // Format Item 2: The actual number of substrings is {2}.
+                        pstrCurrentFileVersionString ,                          // Format Item 3: The version string is {3}.
+                        Environment.NewLine );                                  // Format Item 4: Line break at beginning and end of string and between lines
+                    return SpecialStrings.EMPTY_STRING;
+                }   // FALSE (unanticipated outcome) block, if ( astrVersionSubstrings.Length == EXPECTED_VERSION_SUBSTRING_COUNT )
+            }   // TRUE (anticipated outcome) block, if ( !string.IsNullOrWhiteSpace ( pstrCurrentFileVersionString ) )
+            else
+            {
+                return SpecialStrings.EMPTY_STRING;
+            }   // FALSE (unanticipated outcome) block, if ( !string.IsNullOrWhiteSpace ( pstrCurrentFileVersionString ) )
+        }   // private static string SemVerStringFromFileVersionString
     }   // class Program
 }   // namespace AssemblyInfoUtil

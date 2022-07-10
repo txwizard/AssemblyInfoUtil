@@ -61,6 +61,42 @@ namespace AssemblyInfoUtil.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {4}The format of the version string fed into method {0} is invalid.{4}    The expected number of version substrings is {1}.{4}    The actual number of substrings is {2}.{4}    The version string is {3}.{4}.
+        /// </summary>
+        internal static string ERRMSG_VERSION_STRING_PARTS_COUNT {
+            get {
+                return ResourceManager.GetString("ERRMSG_VERSION_STRING_PARTS_COUNT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [assembly: AssemblyInformationalVersion ( {0} )].
+        /// </summary>
+        internal static string IDS_ASSEMBLYINFORMATIONALVERSION_TEMPLATE {
+            get {
+                return ResourceManager.GetString("IDS_ASSEMBLYINFORMATIONALVERSION_TEMPLATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AssemblyInformationalVersion added: {0}.
+        /// </summary>
+        internal static string MSG_ASSEMBLYINFORMATIONALVERSION_ADDED {
+            get {
+                return ResourceManager.GetString("MSG_ASSEMBLYINFORMATIONALVERSION_ADDED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AssemblyInformationalVersion updateded: {0}.
+        /// </summary>
+        internal static string MSG_ASSEMBLYINFORMATIONALVERSION_UPDATED {
+            get {
+                return ResourceManager.GetString("MSG_ASSEMBLYINFORMATIONALVERSION_UPDATED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please press Return to fully stop the program..
         /// </summary>
         internal static string MSG_AWAIT_CARBON_UNIT {

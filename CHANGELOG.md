@@ -7,6 +7,29 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
+## 2022/07/09, Version 3.3
+
+Implement Support for AssemblyInformationalVersion.
+
+AssemblyInformationalVersion is an assembly attribute that is used only by NuGet.
+Since the NuGet versioning convention is SemVer, the AssemblyInformationalVersion
+is a three-part version string, and the fourth part may be, and often is, a
+string that is used to designate a beta or other pre-release package.
+
+In the interest of maximum flexibility, this program behaves as follows with
+respect to this assembly attribute.
+
+1. When AssemblyInformationalVersion exists, its first three substrings, all of
+which must be numeric, are updated to match the corresponding values in the
+AssemblyFileVersion attribute when it is updated.
+
+2. When the AssemblyInformationalVersion attribute is missing, it is added and
+set to the Semantic Version per the AssemblyFileVersion attribute.
+
+3) When the AssemblyFileVersion remains unchanged, so does the
+AssemblyInformationalVersion. Moreover, the program dispenses with checking for its
+presence unless the AssemblyFileVersion attribute is being updated.
+
 ## 2022/06/19, Version 3.2
 
 Display details about changes made to the version and copyright notice attributes, including notes when one or the other is skipped.

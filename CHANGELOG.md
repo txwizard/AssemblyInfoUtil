@@ -7,6 +7,7 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
+## 2022/11/24, Version 3.4
 ## 2022/07/10, Version 3.4
 
 1. Fix a bug that prevented existing AssemblyInformationalVersion being updated,

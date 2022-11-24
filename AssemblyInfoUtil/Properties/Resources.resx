@@ -193,9 +193,6 @@
     <value>Done!</value>
     <comment>The main processing routine displays this message as it finished processing the input file.</comment>
   </data>
-  <data name="MSG_PROJECT_IS_UNCHANGED" xml:space="preserve">
-    <value>{0}Since the project is unchanged, AssemblyInfo.cs remains unchanged and unexamined.{0}</value>
-  </data>
   <data name="MSG_SOURCE_UNCHANGED" xml:space="preserve">
     <value>{0}Since the project is unchanged, AssemblyInfo.cs remains unchanged and unexamined.{0}</value>
   </data>

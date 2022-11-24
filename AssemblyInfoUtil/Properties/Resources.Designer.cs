@@ -261,15 +261,6 @@ namespace AssemblyInfoUtil.Properties {
         /// <summary>
         ///   Looks up a localized string similar to {0}Since the project is unchanged, AssemblyInfo.cs remains unchanged and unexamined.{0}.
         /// </summary>
-        internal static string MSG_PROJECT_IS_UNCHANGED {
-            get {
-                return ResourceManager.GetString("MSG_PROJECT_IS_UNCHANGED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0}Since the project is unchanged, AssemblyInfo.cs remains unchanged and unexamined.{0}.
-        /// </summary>
         internal static string MSG_SOURCE_UNCHANGED {
             get {
                 return ResourceManager.GetString("MSG_SOURCE_UNCHANGED", resourceCulture);

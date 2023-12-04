@@ -7,7 +7,14 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
-## 2022/11/24, Version 3.4
+## 2022/11/24, Version 3.6
+
+1. Add a line break to the shutdown message, so that there is always one in the
+output stream.
+
+2. Update the NuGet packages to the new versions that target framework 4.8.
+
+## 2022/11/24, Version 3.5
 ## 2022/07/10, Version 3.4
 
 1. Fix a bug that prevented existing AssemblyInformationalVersion being updated,

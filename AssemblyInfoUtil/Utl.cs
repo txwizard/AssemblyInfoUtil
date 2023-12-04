@@ -23,6 +23,9 @@
     Date       Version By Synopsis
     ---------- ------- -- ------------------------------------------------------
     2019/06/29 2.0     DG This class makes its first appearance.
+
+    2022/07/10 3.6     DG Add a line break to the shutdown message so that there 
+                          is always one in the output stream.
     ============================================================================
 */
 

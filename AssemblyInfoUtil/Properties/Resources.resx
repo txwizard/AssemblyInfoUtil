@@ -201,7 +201,7 @@
     <comment>The CreateStartupBanner method formats its message from this template.</comment>
   </data>
   <data name="MSG_STOP" xml:space="preserve">
-    <value>{4}{0} Done, {1} ({2} UTC){4}Running time = {3}</value>
+    <value>{4}{0} Done, {1} ({2} UTC){4}Running time = {3}{4}</value>
     <comment>The CreateShutdownBanner method formats its message from this template.</comment>
   </data>
   <data name="MSG_UPDATING_ANSWER_COPYRIGHT_YEAR" xml:space="preserve">

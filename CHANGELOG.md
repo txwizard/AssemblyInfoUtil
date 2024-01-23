@@ -7,6 +7,11 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
+## 2024/01/23, Version 3.7
+
+Extend support to larger projects, such as ASP.NET MVC projrcts, that have
+multiple subdirectories full of source code.
+
 ## 2022/11/24, Version 3.6
 
 1. Add a line break to the shutdown message, so that there is always one in the

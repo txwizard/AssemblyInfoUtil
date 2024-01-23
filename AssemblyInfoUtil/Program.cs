@@ -408,6 +408,30 @@ namespace AssemblyInfoUtil
                     }   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
                 }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < files.Length ; intJ++ )
 
+                DirectoryInfo [ ] directoryInfos = diAssemblyInfoParent.GetDirectories ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
+
+                for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
+                          intJ < directoryInfos.Length ;
+                          intJ++ )
+                {
+                    switch ( directoryInfos [ intJ ].Name )
+                    {
+                        case @".git":
+                        case @".vs":
+                        case @"bin":
+                        case @"obj":
+                        case @"packages":
+                        case @"Properties":
+                            break;
+                        default:
+                            if ( ProcessSubdirectory ( directoryInfos [ intJ ] ) )
+                            {
+                                return true;
+                            }   // if ( ProcessSubdirectory ( directoryInfos [ intJ ] ) )
+                            break;
+                    }   // switch ( directoryInfos [ intJ ].Name )
+                }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < directoryInfos.Length ; intJ++ )
+
                 //  ------------------------------------------------------------
                 //  If processing reaches this point, NONE of the files in the
                 //  directory that contains the specified AssemblyInfo.cs or its
@@ -421,6 +445,49 @@ namespace AssemblyInfoUtil
                 return true;
             }   // FALSE (The switch to suppress processing unless files are changed is DISabled.) block, if ( s_OnlyWhenModified )
         }   // private static bool OK2Proceed
+
+
+        /// <summary>
+        /// This method is called recursively to process the files and their
+        /// directories underneath the main project directory.
+        /// </summary>
+        /// <param name="pdiSubDirectoryInfo">
+        /// Specify the DirectoryInfo of the source code subdirectory to
+        /// process.
+        /// </param>
+        /// <returns>
+        /// When a file that has its Archive flag set is encountered, the
+        /// function returns True. If it exhausts all files and subdirectories
+        /// in the directory witout doing so, the return valuee is False.
+        /// </returns>
+        private static bool ProcessSubdirectory ( DirectoryInfo pdiSubDirectoryInfo )
+        {
+            FileInfo [ ] files = pdiSubDirectoryInfo.GetFiles ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
+
+            for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
+                      intJ < files.Length ;
+                      intJ++ )
+            {
+                if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+                {   // Stop when we find one modified file.
+                    return true;
+                }   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+            }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < files.Length ; intJ++ )
+
+            DirectoryInfo [ ] directoryInfos = pdiSubDirectoryInfo.GetDirectories ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
+
+            for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
+                      intJ < directoryInfos.Length ;
+                      intJ++ )
+            { 
+                if ( ProcessSubdirectory ( directoryInfos [ intJ ] ) )
+                {
+                    return true;
+                }   // if ( ProcessSubdirectory ( directoryInfos [ intJ ] ) )
+            }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < directoryInfos.Length ; intJ++ )
+
+            return false;
+        }   // private static bool ProcessSubdirectory
 
 
         /// <summary>

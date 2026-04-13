@@ -102,12 +102,22 @@
     2022/07/10 3.4     DG Fix a bug that prevented AssemblyInformationalVersion
                           updating correctly, and move most of the remaining
                           strings from Program.cs to the string table.
+
+    2026/04/13 3.8	   DG Add support for suppressing processing when the only
+                          changed files are those that do not, per se, require a
+                          build increment, such as configuration files.
+
+                          The names of such files are specified in the
+                          app.config file, and the program checks for changes to
+                          them in the directory that contains the specified
+                          AssemblyInfo.cs file and its immediate parent.
     ============================================================================
 */
 
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Text;
 
@@ -129,7 +139,7 @@ namespace AssemblyInfoUtil
         const string CMD_COPYRIGHT_YEAR = @"-cy";
         const string CMD_CHECK4MODIFIED = @"-onlywhenmodified";
 
-        const int ERR_RUNTIME = 1;                                                  // 0x01
+		const int ERR_RUNTIME = 1;                                                  // 0x01
         const int ERR_NO_FILENAME = ERR_RUNTIME + 1;                                // 0x02
         const int ERR_FILE_NOT_FOUND = ERR_NO_FILENAME + 1;                         // 0x03
         const int ERR_INCREMENT_MUST_BE_NUMERIC = ERR_FILE_NOT_FOUND + 1;           // 0x04
@@ -367,10 +377,20 @@ namespace AssemblyInfoUtil
         {
             if ( s_OnlyWhenModified )
             {
-                FileInfo fiAssemblyInfo = new FileInfo ( s_InputFileName );
+                string strOK2Skip = ConfigurationManager.AppSettings [ @"OK2BChanged" ] ?? @"packages.config¬app.config;";
+
+                HashSet<string> hsOK2Skip = new HashSet<string> (
+                    strOK2Skip.Split (
+                        new char [ ] { SpecialCharacters.LOGICAL_NEGATE } ,
+                        StringSplitOptions.RemoveEmptyEntries ) ,
+                    StringComparer.CurrentCultureIgnoreCase );
+
+				FileInfo fiAssemblyInfo = new FileInfo ( s_InputFileName );
                 DateTime dtmAssemblyInfoModDate = fiAssemblyInfo.LastWriteTimeUtc;
                 DirectoryInfo diAssemblyInfoHome = fiAssemblyInfo.Directory;
-                FileInfo [ ] files = diAssemblyInfoHome.GetFiles ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
+                FileInfo [ ] files = diAssemblyInfoHome.GetFiles ( 
+                    SpecialStrings.ASTERISK ,
+                    SearchOption.TopDirectoryOnly );
 
                 //  ------------------------------------------------------------
                 //  Check the files in the directory that contains AssemblyInfo
@@ -402,7 +422,19 @@ namespace AssemblyInfoUtil
                           intJ < files.Length ;
                           intJ++ )
                 {
-                    if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+                    if ( hsOK2Skip.Contains ( files [ intJ ].Name ) )
+                    {
+                        if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+                        {   // Note if modified.
+                            string strFileModDateLocal = files [ intJ ].LastWriteTime.ToString ( SysDateFormatters.RFD_YYYY_MM_DD_HH_MM_SS );
+                            string strFileModDateUTC = files [ intJ ].LastWriteTimeUtc.ToString ( SysDateFormatters.RFD_YYYY_MM_DD_HH_MM_SS );
+                            Console.Write ( $"{files [ intJ ].FullName} modified {strFileModDateLocal} ({strFileModDateUTC} UTC), Skipped because changes do not, per se, require a build increment." );
+						}   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+
+						continue;       // Skip ALWAYS.
+					}   // if ( hsOK2Skip.Contains ( files [ intJ ].Name ) )
+
+					if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
                     {   // Stop when we find one modified file.
                         return true;
                     }   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )

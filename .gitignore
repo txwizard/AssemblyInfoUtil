@@ -1,0 +1,81 @@
+# ============================================
+# Visual Studio user files
+# ============================================
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# ============================================
+# Architecture-specific build output
+# (each contains Debug/ and Release/)
+# ============================================
+Win32/Debug/
+Win32/Release/
+x64/Debug/
+x64/Release/
+X64/Debug/
+X64/Release/
+ARM/Debug/
+ARM/Release/
+ARM64/Debug/
+ARM64/Release/
+
+# ============================================
+# Generic build output directories
+# (covers projects that use Bin/Obj instead)
+# ============================================
+[Bb]in/
+[Oo]bj/
+
+# ============================================
+# Compiler and linker artifacts
+# ============================================
+*.obj
+*.pch
+*.pdb
+*.idb
+*.ilk
+*.exp
+*.lib
+*.res
+*.tlog
+*.log
+*.tmp
+*.rsp
+*.manifest
+*.dll.embed.manifest
+*.dll.intermediate.manifest
+
+# ============================================
+# Visual Studio cache and database files
+# ============================================
+.vs/
+ipch/
+*.VC.db
+*.VC.VC.opendb
+*.opendb
+*.sdf
+*.cachefile
+
+# ============================================
+# Test results
+# ============================================
+TestResult.xml
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# ============================================
+# Temporary / backup files
+# ============================================
+*.tmp
+*.bak
+*.old
+~$*
+*~
+
+# ============================================
+# Keep published binaries visible
+# ============================================
+!Binaries_Built/

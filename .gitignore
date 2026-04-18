@@ -1,81 +1,113 @@
 # ============================================
-# Visual Studio user files
+# Build artifacts
 # ============================================
-*.suo
+**/bin/
+**/obj/
+
+# NuGet
+**/packages/
+*.nupkg
+project.lock.json
+project.assets.json
+
+# Visual Studio
+.vs/
 *.user
-*.userosscache
-*.sln.docstates
-*.userprefs
+*.suo
+*.cache
 
-# ============================================
-# Architecture-specific build output
-# (each contains Debug/ and Release/)
-# ============================================
-Win32/Debug/
-Win32/Release/
-x64/Debug/
-x64/Release/
-X64/Debug/
-X64/Release/
-ARM/Debug/
-ARM/Release/
-ARM64/Debug/
-ARM64/Release/
-
-# ============================================
-# Generic build output directories
-# (covers projects that use Bin/Obj instead)
-# ============================================
-[Bb]in/
-[Oo]bj/
-
-# ============================================
-# Compiler and linker artifacts
-# ============================================
-*.obj
-*.pch
+# Debugging / intermediate
 *.pdb
-*.idb
 *.ilk
-*.exp
-*.lib
-*.res
+*.idb
 *.tlog
 *.log
-*.tmp
-*.rsp
-*.manifest
-*.dll.embed.manifest
-*.dll.intermediate.manifest
 
-# ============================================
-# Visual Studio cache and database files
-# ============================================
-.vs/
-ipch/
-*.VC.db
-*.VC.VC.opendb
-*.opendb
-*.sdf
-*.cachefile
-
-# ============================================
-# Test results
-# ============================================
-TestResult.xml
-[Tt]est[Rr]esult*/
-[Bb]uild[Ll]og.*
-
-# ============================================
-# Temporary / backup files
-# ============================================
+# Backup / temp
 *.tmp
 *.bak
 *.old
 ~$*
-*~
 
 # ============================================
-# Keep published binaries visible
+# JavaScript protection (scoped, not global)
 # ============================================
-!Binaries_Built/
+
+# Proprietary JS lives only in Test_Data
+Test_Data/**/*.js
+
+# Guard JS inside BuildTools; allow only the JSLint test
+BuildTools/**/*.js
+!BuildTools/jsl-test.js
+
+# Explicitly allow JS in documentation output
+!docs/**/*.js
+!docfx_project/**/*.js
+
+# ============================================
+# BuildTools junction protection
+# ============================================
+
+# Ignore everything under BuildTools by default
+BuildTools/**
+
+# Allow the curated toolchain
+!BuildTools/AssemblyInfoUtil.exe
+!BuildTools/AssemblyInfoUtil.exe.config
+!BuildTools/AssemblyInfoUtil.pdb
+!BuildTools/AssemblyInfoUtil.xml
+
+!BuildTools/ConsoleColors.CMD
+!BuildTools/ConsoleDiag.CMD
+!BuildTools/ConsoleFormat.CMD
+!BuildTools/ConsoleLib.CMD
+!BuildTools/ConsoleVT.CMD
+
+!BuildTools/ListDelta.exe
+!BuildTools/ListDelta.exe.config
+!BuildTools/ListDelta.pdb
+
+!BuildTools/VTProbe.exe
+!BuildTools/VTProbe.pdb
+
+!BuildTools/XCopyD.CMD
+!BuildTools/XcopyDestIsDir.TXT
+!BuildTools/XcopyDestIsFile.TXT
+!BuildTools/XCOPYF.CMD
+
+!BuildTools/7UP.CMD
+
+# Allow the JSLint test file
+!BuildTools/jsl-test.js
+
+# ============================================
+# Directories that must remain visible
+# ============================================
+
+# DocFX output (published to GitHub Pages)
+!docs/
+!docfx_project/
+
+# ============================================
+# Test artifacts exposes the HelloWorld test
+# project, while respecting the global ignore
+# glob in the Test_Data/.gitignore that hides
+# a couple of files that are nobody else's
+# business.
+# ============================================
+
+!Test_Data/
+!Test_Data/HelloWorld_20260418_004328.7z
+!Test_Data/HelloWorld/**
+
+# ============================================
+# Respect per-directory .gitignore files
+# (These directories already manage their own exclusions)
+# ============================================
+# _archive/
+# _NOTES/
+# 64Bit_Native/
+# DLLServices2/
+# Redirected_Streams/
+# REFERENCE/
+# StandardHandlesLab/

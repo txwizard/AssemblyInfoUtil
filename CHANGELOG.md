@@ -7,6 +7,28 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
+## 2026/04/18, version 3.9
+
+Change the processing algorithm in two ways.
+
+1. Compare the last modified date of each relevant file against the last
+   modified date of the project AssemblyInfo.cs file that was specified in the
+   command line. This change is necessitated by the fact that I cannot rely upon
+   the Archive flag being reset.
+
+2. Process ALL files in the parent directory of the specified AssemblyInfo.cs,
+   excluding files and directories such as those that hold build artifacts that
+   are identified by a list stored in the app config file.
+
+## 2026/04/13, version 3.8
+
+DG Add support for suppressing processing when the only changed files are those
+that do not, per se, require a build increment, such as configuration files.
+
+The names of such files are specified in the app.config file, and the program
+checks for changes to them in the directory that contains the specified
+AssemblyInfo.cs file and its immediate parent.
+
 ## 2024/01/23, Version 3.7
 
 Extend support to larger projects, such as ASP.NET MVC projrcts, that have

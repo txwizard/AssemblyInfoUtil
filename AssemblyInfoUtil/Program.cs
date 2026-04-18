@@ -111,6 +111,21 @@
                           app.config file, and the program checks for changes to
                           them in the directory that contains the specified
                           AssemblyInfo.cs file and its immediate parent.
+
+    2026/04/18 3.9     DG Change the processing algorithm in two ways.
+
+                          1) Compare the last modified date of each relevant
+                             file against the last modified date of the project
+                             AssemblyInfo.cs file that was specified in the
+                             command line. This change is necessitated by the
+                             fact that I cannot rely upon the Archive flag being
+                             reset.
+
+                          2) Process ALL files in the parent directory of the
+                             specified AssemblyInfo.cs, excluding files and
+                             directories such as those that hold build artifacts
+                             that are identified by a list stored in the app
+                             config file.
     ============================================================================
 */
 
@@ -377,36 +392,22 @@ namespace AssemblyInfoUtil
         {
             if ( s_OnlyWhenModified )
             {
-                string strOK2Skip = ConfigurationManager.AppSettings [ @"OK2BChanged" ] ?? @"packages.config¬app.config;";
+                string strOK2Skip = ConfigurationManager.AppSettings [ @"OK2BChanged" ] ?? @"packages.config¬app.config¬AssemblyInfo.cs¬AssemblyInfo.vb";
+                string strDirectories2Skip = ConfigurationManager.AppSettings [ @"Directories2Skip" ] ?? @"Backup¬bin¬obj¬Package";
 
-                HashSet<string> hsOK2Skip = new HashSet<string> (
+				HashSet<string> hsOK2Skip = new HashSet<string> (
                     strOK2Skip.Split (
                         new char [ ] { SpecialCharacters.LOGICAL_NEGATE } ,
                         StringSplitOptions.RemoveEmptyEntries ) ,
-                    StringComparer.CurrentCultureIgnoreCase );
+                    StringComparer.OrdinalIgnoreCase );
+                HashSet<string> hsDirectories2Skip = new HashSet<string> (
+                    strDirectories2Skip.Split (
+                        new char [ ] { SpecialCharacters.LOGICAL_NEGATE } ,
+                        StringSplitOptions.RemoveEmptyEntries ) ,
+                    StringComparer.OrdinalIgnoreCase );
 
 				FileInfo fiAssemblyInfo = new FileInfo ( s_InputFileName );
                 DateTime dtmAssemblyInfoModDate = fiAssemblyInfo.LastWriteTimeUtc;
-                DirectoryInfo diAssemblyInfoHome = fiAssemblyInfo.Directory;
-                FileInfo [ ] files = diAssemblyInfoHome.GetFiles ( 
-                    SpecialStrings.ASTERISK ,
-                    SearchOption.TopDirectoryOnly );
-
-                //  ------------------------------------------------------------
-                //  Check the files in the directory that contains AssemblyInfo
-                //  for newer files or files that have their Archive flag set.
-                //  Return True when either condition obtains.
-                //  ------------------------------------------------------------
-
-                for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
-                          intJ < files.Length ;
-                          intJ++ )
-                {
-                    if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
-                    {   // Stop when we find one modified file.
-                        return true;
-                    }   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
-                }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < files.Length ; intJ++ )
 
                 //  ------------------------------------------------------------
                 //  Check the files in the immediate parent of the directory
@@ -415,62 +416,49 @@ namespace AssemblyInfoUtil
                 //  condition obtains.
                 //  ------------------------------------------------------------
 
-                DirectoryInfo diAssemblyInfoParent = diAssemblyInfoHome.Parent;
-                files = diAssemblyInfoParent.GetFiles ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
+                FileInfo [ ] afiAllFilesInTree = fiAssemblyInfo.Directory.Parent.GetFiles (
+                    SpecialStrings.ASTERISK ,
+                    SearchOption.AllDirectories );
 
-                for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
-                          intJ < files.Length ;
+                int intTotaslFiles = afiAllFilesInTree.Length;
+
+				for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
+                          intJ < intTotaslFiles ;
                           intJ++ )
                 {
-                    if ( hsOK2Skip.Contains ( files [ intJ ].Name ) )
+                    if ( SkipThisDirectory ( afiAllFilesInTree [ intJ ].FullName , hsDirectories2Skip ) )
                     {
-                        if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+                        continue;
+					}   // if ( SkipThisDirectory ( afiAllFilesInTree [ intJ ].FullName , hsDirectories2Skip ) )
+
+					if ( hsOK2Skip.Contains ( afiAllFilesInTree [ intJ ].Name ) )
+                    {
+                        if ( afiAllFilesInTree [ intJ ].LastAccessTimeUtc >= dtmAssemblyInfoModDate )
                         {   // Note if modified.
-                            string strFileModDateLocal = files [ intJ ].LastWriteTime.ToString ( SysDateFormatters.RFD_YYYY_MM_DD_HH_MM_SS );
-                            string strFileModDateUTC = files [ intJ ].LastWriteTimeUtc.ToString ( SysDateFormatters.RFD_YYYY_MM_DD_HH_MM_SS );
-                            Console.Write ( $"{files [ intJ ].FullName} modified {strFileModDateLocal} ({strFileModDateUTC} UTC), Skipped because changes do not, per se, require a build increment." );
-						}   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
+							string strFileModDateLocal = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTime );
+							string strFileModDateUTC = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTimeUtc );
+							Console.WriteLine ( $"Modified File {ArrayInfo.OrdinalFromIndex(intJ)} of {intTotaslFiles}: {afiAllFilesInTree [ intJ ].FullName} modified {strFileModDateLocal} ({strFileModDateUTC} UTC), Skipped because changes do not, per se, require a build increment." );
+						}   // if ( afiAllFilesInTree [ intJ ].LastAccessTimeUtc >= dtmAssemblyInfoModDate )
 
-						continue;       // Skip ALWAYS.
-					}   // if ( hsOK2Skip.Contains ( files [ intJ ].Name ) )
+						continue;       // Skip AMYWAY.
+					}   // if ( hsOK2Skip.Contains ( afiAllFilesInTree [ intJ ].Name ) )
 
-					if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
-                    {   // Stop when we find one modified file.
-                        return true;
-                    }   // if ( ( files [ intJ ].Attributes & FileAttributes.Archive ) == FileAttributes.Archive )
-                }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < files.Length ; intJ++ )
+					if ( afiAllFilesInTree [ intJ ].LastAccessTimeUtc >= dtmAssemblyInfoModDate )
+					{   // Stop when we find one modified file.
+                        string strFileModDateLocal = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTime );
+                        string strFileModDateUTC = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTimeUtc );
+						Console.WriteLine ( $"Modified File {ArrayInfo.OrdinalFromIndex ( intJ )} of {intTotaslFiles}: {afiAllFilesInTree [ intJ ].FullName} modified {strFileModDateLocal} ({strFileModDateUTC} UTC), newer than AssemblyInfo.cs (modified {dtmAssemblyInfoModDate.ToString ( SysDateFormatters.RFD_YYYY_MM_DD_HH_MM_SS )} UTC)." );
+						return true;
+					}   // if ( afiAllFilesInTree [ intJ ].LastAccessTimeUtc >= dtmAssemblyInfoModDate )
+				}   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < intTotaslFiles ; intJ++ )
 
-                DirectoryInfo [ ] directoryInfos = diAssemblyInfoParent.GetDirectories ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
+				//  ------------------------------------------------------------
+				//  If processing reaches this point, NONE of the files in the
+				//  directory that contains the specified AssemblyInfo.cs or its
+				//  parent directory meets the conditions for processing.
+				//  ------------------------------------------------------------
 
-                for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ;
-                          intJ < directoryInfos.Length ;
-                          intJ++ )
-                {
-                    switch ( directoryInfos [ intJ ].Name )
-                    {
-                        case @".git":
-                        case @".vs":
-                        case @"bin":
-                        case @"obj":
-                        case @"packages":
-                        case @"Properties":
-                            break;
-                        default:
-                            if ( ProcessSubdirectory ( directoryInfos [ intJ ] ) )
-                            {
-                                return true;
-                            }   // if ( ProcessSubdirectory ( directoryInfos [ intJ ] ) )
-                            break;
-                    }   // switch ( directoryInfos [ intJ ].Name )
-                }   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < directoryInfos.Length ; intJ++ )
-
-                //  ------------------------------------------------------------
-                //  If processing reaches this point, NONE of the files in the
-                //  directory that contains the specified AssemblyInfo.cs or its
-                //  parent directory meets the conditions for processing.
-                //  ------------------------------------------------------------
-
-                return false;
+				return false;
             }   // TRUE (The switch to suppress processing unless files are changed is ENabled.) block, if ( s_OnlyWhenModified )
             else
             {
@@ -479,20 +467,20 @@ namespace AssemblyInfoUtil
         }   // private static bool OK2Proceed
 
 
-        /// <summary>
-        /// This method is called recursively to process the files and their
-        /// directories underneath the main project directory.
-        /// </summary>
-        /// <param name="pdiSubDirectoryInfo">
-        /// Specify the DirectoryInfo of the source code subdirectory to
-        /// process.
-        /// </param>
-        /// <returns>
-        /// When a file that has its Archive flag set is encountered, the
-        /// function returns True. If it exhausts all files and subdirectories
-        /// in the directory witout doing so, the return valuee is False.
-        /// </returns>
-        private static bool ProcessSubdirectory ( DirectoryInfo pdiSubDirectoryInfo )
+		/// <summary>
+		/// This method is called recursively to process the files and their
+		/// directories underneath the main project directory.
+		/// </summary>
+		/// <param name="pdiSubDirectoryInfo">
+		/// Specify the DirectoryInfo of the source code subdirectory to
+		/// process.
+		/// </param>
+		/// <returns>
+		/// When a file that has its Archive flag set is encountered, the
+		/// function returns True. If it exhausts all files and subdirectories
+		/// in the directory witout doing so, the return valuee is False.
+		/// </returns>
+		private static bool ProcessSubdirectory ( DirectoryInfo pdiSubDirectoryInfo )
         {
             FileInfo [ ] files = pdiSubDirectoryInfo.GetFiles ( SpecialStrings.ASTERISK , SearchOption.TopDirectoryOnly );
 
@@ -1059,5 +1047,45 @@ namespace AssemblyInfoUtil
                 return SpecialStrings.EMPTY_STRING;
             }   // FALSE (unanticipated outcome) block, if ( !string.IsNullOrWhiteSpace ( pstrCurrentFileVersionString ) )
         }   // private static string SemVerStringFromFileVersionString
-    }   // class Program
+
+
+        /// <summary>
+        /// Return true if any member of string HashSet 
+        /// <paramref name="phsDirectories2Skip"/>, bounded by backslash
+        /// characters, occurs in the absolute (fully qualified) file name
+        /// represented by <paramref name="pstrFullName"/>.
+        /// </summary>
+        /// <param name="pstrFullName">
+        /// This string represents the absolute (fully qualified) name of a file
+        /// in the parent of the directory in which the specified AssemblyInfo
+        /// file is located or one of its children.
+        /// </param>
+        /// <param name="phsDirectories2Skip">
+        /// This HashSet of strings is the list of directory names to ignore
+        /// because they are either build artifacts or other excluded
+        /// directories.
+        /// </param>
+        /// <returns>
+        /// If a directory fragment of the absolute (fully qualified) file name
+        /// given by <paramref name="phsDirectories2Skip"/> is in the list of
+        /// excluded directories given by <paramref name="phsDirectories2Skip"/>,
+        /// return True, otherwise, return False.
+        /// </returns>
+        /// <remarks>
+        /// To ensure that only directories are included, each directory name in
+        /// the HashSet is wrapped in backslash characters.
+        /// </remarks>
+		private static bool SkipThisDirectory ( string pstrFullName , HashSet<string> phsDirectories2Skip )
+		{
+            foreach ( string strDirectoryName in phsDirectories2Skip )
+            {
+                if ( pstrFullName.IndexOf ( string.Format ( @"\{0}\" , strDirectoryName ) , StringComparison.InvariantCultureIgnoreCase ) > ListInfo.INDEXOF_NOT_FOUND )
+                {
+                    return true;
+				}   // if ( pstrFullName.IndexOf ( string.Format ( @"\{0}\" , strDirectoryName ) , StringComparison.InvariantCultureIgnoreCase ) > ListInfo.INDEXOF_NOT_FOUND )
+			}   // foreach ( string strDirectoryName in phsDirectories2Skip )
+
+			return false;
+		}   // private static bool SkipThisDirectory
+	}   // class Program
 }   // namespace AssemblyInfoUtil

@@ -1,0 +1,8 @@
+D:\Source_Code\Visual_Studio\Projects\Tools_for_Programmers\AssemblyInfoUtil\Test_Data\HelloWorld\bin\Debug\HelloWorld.exe.config
+D:\Source_Code\Visual_Studio\Projects\Tools_for_Programmers\AssemblyInfoUtil\Test_Data\HelloWorld\bin\Debug\HelloWorld.exe
+D:\Source_Code\Visual_Studio\Projects\Tools_for_Programmers\AssemblyInfoUtil\Test_Data\HelloWorld\bin\Debug\HelloWorld.pdb
+D:\Source_Code\Visual_Studio\Projects\Tools_for_Programmers\AssemblyInfoUtil\Test_Data\HelloWorld\obj\Debug\HelloWorld.csproj.AssemblyReference.cache
+D:\Source_Code\Visual_Studio\Projects\Tools_for_Programmers\AssemblyInfoUtil\Test_Data\HelloWorld\obj\Debug\HelloWorld.csproj.CoreCompileInputs.cache
+D:\Source_Code\Visual_Studio\Projects\Tools_for_Programmers\AssemblyInfoUtil\Test_Data\HelloWorld\obj\Debug\HelloWorld.exe
+D:\Source_Code\Visual_Studio\Projects\Tools_for_Programmers\AssemblyInfoUtil\Test_Data\HelloWorld\obj\Debug\HelloWorld.pdb
+D:\Source_Code\Visual_Studio\Projects\Tools_for_Programmers\AssemblyInfoUtil\Test_Data\HelloWorld\obj\Debug\HelloWorld.exe.config

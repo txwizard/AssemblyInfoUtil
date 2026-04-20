@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration ( "" )]
 [assembly: AssemblyCompany ( "David A. Gray, MBA." )]
 [assembly: AssemblyProduct ( "HelloWorld" )]
-[assembly: AssemblyCopyright ( "Copyright © David A. Gray 2026" )]
+[assembly: AssemblyCopyright ( "Copyright © David A. Gray 2024-2026" )]
 [assembly: AssemblyTrademark ( "" )]
 [assembly: AssemblyCulture ( "" )]
 
@@ -30,4 +30,5 @@ using System.Runtime.InteropServices;
 //      Revision
 //
 [assembly: AssemblyVersion ( "1.0.0.0" )]
-[assembly: AssemblyFileVersion ( "1.0.0.0" )]
+[assembly: AssemblyFileVersion ( "1.0.1.0" )]
+[assembly: AssemblyInformationalVersion ( "1.0.1" )]

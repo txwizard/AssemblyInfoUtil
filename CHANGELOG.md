@@ -7,6 +7,20 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
+## 2026/04/20, version 3.9.101
+
+This is a hotfix release that addresses two minor issues that I discovered in version 3.9.
+
+1. The program was not correctly handling the case in which the specified 
+   AssemblyInfo.cs had a single copyright year that had become out of date. In
+   this case, the program was not updating the year, and it was not displaying a
+   message to that effect.
+
+2. The program displayed a format string where it should have displayed the last
+   modified date of AssemblyInfo.cs when it was skipping processing because the
+   only changed files were those that do not, per se, require a build increment,
+   such as configuration files.
+
 ## 2026/04/18, version 3.9
 
 Change the processing algorithm in two ways.

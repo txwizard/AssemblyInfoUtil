@@ -291,33 +291,70 @@ namespace AssemblyInfoUtil
                                         Properties.Resources.MSG_COPYRIGHT_YEAR_UNCHANGED ,
                                         strOldCopyrightYear ,                   // Format Item 0: Copyright Year Unchanged: Current Value = {0}
                                         Environment.NewLine );                  // Format Item 1: At the beginning and enf of the line
+                                    return pstrLineIn;
                                 }   // FALSE (The last copyright year is up to date.) block, if ( intCurrentYear > intLastCopyrightYear )
                             }   // TRUE (The copyright year parsed into an integer.) block, if ( int.TryParse ( strLatestCopyrightYear , out int intLastCopyrightYear ) )
-                        }   // TRUE (The delimiters appear to be in order.) block, if ( intPosEnd > ListInfo.INDEXOF_NOT_FOUND )
-                    }   // TRUE (The copyright year is a hyphenated range.) block, if ( intPosHyphen > ListInfo.INDEXOF_NOT_FOUND )
+                            else
+                            {
+                                Console.WriteLine (
+                                    Properties.Resources.MSG_COPYRIGHT_YEAR_UNCHANGED ,
+                                    strOldCopyrightYear ,                   // Format Item 0: Copyright Year Unchanged: Current Value = {0}
+                                    Environment.NewLine );                  // Format Item 1: At the beginning and enf of the line
+                                return pstrLineIn;
+                            }   // TRUE (The delimiters appear to be in order.) block, if ( intPosEnd > ListInfo.INDEXOF_NOT_FOUND )
+						}   // TRUE (anticipated outcome) block, if ( intPosEnd > ListInfo.INDEXOF_NOT_FOUND )
+                        else
+                        {
+							Console.WriteLine (
+								Properties.Resources.MSG_COPYRIGHT_YEAR_UNCHANGED ,
+								strOldCopyrightYear ,                   // Format Item 0: Copyright Year Unchanged: Current Value = {0}
+								Environment.NewLine );                  // Format Item 1: At the beginning and enf of the line
+							return pstrLineIn;
+						}   // FALSE (unanticipated outcome) block, if ( intPosEnd > ListInfo.INDEXOF_NOT_FOUND )
+					}   // TRUE (The copyright year is a hyphenated range.) block, if ( intPosHyphen > ListInfo.INDEXOF_NOT_FOUND )
                     else
                     {
-                        Console.WriteLine (
-                            Properties.Resources.MSG_COPYRIGHT_YEAR_IS_SINGLE_YEAR ,
-                            pstrLineIn ,                                        // Format Item 0: The copyright year is a single year: {0}
-                            Environment.NewLine );                              // Format Item 1: Both ends of the line
-                    }   // FALSE (The copyright year is a single year, which is unsupported by the current version.) block, if ( intPosHyphen > ListInfo.INDEXOF_NOT_FOUND )
-                }   // TRUE (AssemblyCopyright attribute found and appears to be well formed.) block, if ( intPosAttributeName > ListInfo.INDEXOF_NOT_FOUND && intPosCopyrightString > intPosAttributeName )
-            }   // FALSE (standard case) block, if ( string.IsNullOrWhiteSpace ( pstrLineIn ) )}
+                        int intSingleCopyrightYear = GetSingleCopyrightYear ( strOldCopyrightYear );
+						int intCurrentYear = DateTime.UtcNow.Year;
 
-            return pstrLineIn;
+                        if ( intCurrentYear > intSingleCopyrightYear )
+                        {
+                            Console.WriteLine (
+                                Properties.Resources.MSG_COPYRIGHT_YEAR_CHANGE ,// Format Control string
+								intSingleCopyrightYear ,                        // Format Item 0: Copyright Year Changed: Old Value = {0}
+                                intCurrentYear ,                                // Format Item 1: New Value = {1}
+                                Environment.NewLine );                          // Format Item 2: At the beginning of the first line and at the end of both lines
+                            return pstrLineIn.Replace (
+                                intSingleCopyrightYear.ToString ( ) ,
+                                $"{intSingleCopyrightYear}-{intCurrentYear}" );
+						}   // TRUE (The single copyright year is out of date.) block, if ( intCurrentYear > intSingleCopyrightYear )
+						else
+                        {
+							Console.WriteLine (
+								Properties.Resources.MSG_SINGLE_COPYRIGHT_YEAR ,// Format Control string
+								pstrLineIn ,                                    // Format Item 0: The copyright year is a single year: {0}
+								Environment.NewLine );                          // Format Item 1: Both ends of the line
+							return pstrLineIn;
+						}   // FALSE (The single copyright year is up to date.) block, if ( intCurrentYear > intSingleCopyrightYear )
+					}   // FALSE (The copyright year is a single year, which is unsupported by the current version.) block, if ( intPosHyphen > ListInfo.INDEXOF_NOT_FOUND )
+                }   // TRUE (AssemblyCopyright attribute found and appears to be well formed.) block, if ( intPosAttributeName > ListInfo.INDEXOF_NOT_FOUND && intPosCopyrightString > intPosAttributeName )
+                else
+                {
+                    return pstrLineIn;
+				}
+            }   // FALSE (standard case) block, if ( string.IsNullOrWhiteSpace ( pstrLineIn ) )}
         }   // private static string CheckCopyrightYear
 
 
-        /// <summary>
-        /// Display a short help message and return the status code specified in
-        /// <paramref name="pintStatusCode"/>.
-        /// </summary>
-        /// <param name="pintStatusCode">
-        /// This signed integer receives the status code to return to the
-        /// operating system.
-        /// </param>
-        private static void DisplayHelpAndSetStatusCode ( int pintStatusCode )
+		/// <summary>
+		/// Display a short help message and return the status code specified in
+		/// <paramref name="pintStatusCode"/>.
+		/// </summary>
+		/// <param name="pintStatusCode">
+		/// This signed integer receives the status code to return to the
+		/// operating system.
+		/// </param>
+		private static void DisplayHelpAndSetStatusCode ( int pintStatusCode )
         {
             Console.WriteLine ( Properties.Resources.MSG_USAGE_1 , Environment.NewLine );
             Console.WriteLine ( Properties.Resources.MSG_USAGE_2 , CMD_SET_VERSION );
@@ -332,24 +369,55 @@ namespace AssemblyInfoUtil
         }   // private static void DisplayHelpAndSetStatusCode
 
 
-        /// <summary>
-        /// <para>
-        /// Do whatever is needed to implement AssemblyInformationalVersion.
-        /// </para>
-        /// <para>
-        /// If one exists and the FileVersion string was updated, update it with
-        /// the new FileVersion string.
-        /// </para>
-        /// <para>
-        /// If there isn't one yet and an updated FileVersion string exists,
-        /// create it and initialize it with the current FileVersion string.
-        /// </para>
-        /// </summary>
-        /// <param name="plstAssemblyInfoLines">
-        /// Like the routine that calls it, this routine needs to see the whole
-        /// list of assembly attributes.
-        /// </param>
-        private static void HandleAssemblyInformationalVersion ( List<string> plstAssemblyInfoLines )
+		/// <summary>
+		/// When the copyright year is a single year, this method determines
+		/// whether the year is out of date, in which case it returns TRUE, or
+		/// is current, in which case it returns FALSE.
+		/// </summary>
+		/// <param name="strOldCopyrightYear">
+		/// This string is the entire line that contains the AssemblyCopyright.
+		/// </param>
+		/// <returns>
+		/// The return value is the single copyright year if it is present and valid,
+		/// and -1 otherwise.
+		/// </returns>
+		private static int GetSingleCopyrightYear ( string strOldCopyrightYear )
+		{
+			int intPosCopyrightYearEnd = strOldCopyrightYear.LastIndexOf ( SpecialCharacters.DOUBLE_QUOTE );
+
+			if ( intPosCopyrightYearEnd > MagicNumbers.ZERO && intPosCopyrightYearEnd < strOldCopyrightYear.Length )
+			{
+				int intPosCopyrightYearBegin = strOldCopyrightYear.LastIndexOf ( SpecialCharacters.SPACE_CHAR , intPosCopyrightYearEnd );
+				string strCopyrightYear = strOldCopyrightYear.Substring ( intPosCopyrightYearBegin , intPosCopyrightYearEnd - intPosCopyrightYearBegin );
+
+				if ( int.TryParse ( strCopyrightYear , out int rintCopyrightYear ) )
+				{
+					return rintCopyrightYear;
+				}   // TRUE (The single copyright year parsed into an integer.) block, if ( int.TryParse ( strCopyrightYear , out int rintCopyrightYear ) )
+			}   // TRUE (The line appears to end with a single year.) block, if ( intPosCopyrightYear > MagicNumbers.ZERO && intPosCopyrightYear < strOldCopyrightYear.Length )
+
+			return -1;
+		}   // private static int GetSingleCopyrightYear
+
+
+		/// <summary>
+		/// <para>
+		/// Do whatever is needed to implement AssemblyInformationalVersion.
+		/// </para>
+		/// <para>
+		/// If one exists and the FileVersion string was updated, update it with
+		/// the new FileVersion string.
+		/// </para>
+		/// <para>
+		/// If there isn't one yet and an updated FileVersion string exists,
+		/// create it and initialize it with the current FileVersion string.
+		/// </para>
+		/// </summary>
+		/// <param name="plstAssemblyInfoLines">
+		/// Like the routine that calls it, this routine needs to see the whole
+		/// list of assembly attributes.
+		/// </param>
+		private static void HandleAssemblyInformationalVersion ( List<string> plstAssemblyInfoLines )
         {
             if ( !string.IsNullOrEmpty ( s_CurrentFileVersionString ) )
             {   // Have version. Check for InformationalVersion
@@ -378,17 +446,17 @@ namespace AssemblyInfoUtil
         }   // private static void HandleAssemblyInformationalVersion
 
 
-        /// <summary>
-        /// Evaluate the s_OnlyWhenModified flag, which is TRUE when command
-        /// line argument -onlywhenmodified is present. When it is, return TRUE
-        /// only when at least one file in the directory that contains the
-        /// AssemblyInfo.cs file specified in the command line or its immediate
-        /// parent is newer than AssemblyInfo.cs or has its Archive flag set.
-        /// </summary>
-        /// <returns>
-        /// See summary.
-        /// </returns>
-        private static bool OK2Proceed ( )
+		/// <summary>
+		/// Evaluate the s_OnlyWhenModified flag, which is TRUE when command
+		/// line argument -onlywhenmodified is present. When it is, return TRUE
+		/// only when at least one file in the directory that contains the
+		/// AssemblyInfo.cs file specified in the command line or its immediate
+		/// parent is newer than AssemblyInfo.cs or has its Archive flag set.
+		/// </summary>
+		/// <returns>
+		/// See summary.
+		/// </returns>
+		private static bool OK2Proceed ( )
         {
             if ( s_OnlyWhenModified )
             {
@@ -408,15 +476,16 @@ namespace AssemblyInfoUtil
 
 				FileInfo fiAssemblyInfo = new FileInfo ( s_InputFileName );
                 DateTime dtmAssemblyInfoModDate = fiAssemblyInfo.LastWriteTimeUtc;
+                string strAssemblyInfoUtcModDateForShow = SysDateFormatters.FormatDateTimeForShow ( dtmAssemblyInfoModDate );
 
-                //  ------------------------------------------------------------
-                //  Check the files in the immediate parent of the directory
-                //  that contains AssemblyInfo for newer files or files that
-                //  have their Archive flag set. Return True when either
-                //  condition obtains.
-                //  ------------------------------------------------------------
+				//  ------------------------------------------------------------
+				//  Check the files in the immediate parent of the directory
+				//  that contains AssemblyInfo for newer files or files that
+				//  have their Archive flag set. Return True when either
+				//  condition obtains.
+				//  ------------------------------------------------------------
 
-                FileInfo [ ] afiAllFilesInTree = fiAssemblyInfo.Directory.Parent.GetFiles (
+				FileInfo [ ] afiAllFilesInTree = fiAssemblyInfo.Directory.Parent.GetFiles (
                     SpecialStrings.ASTERISK ,
                     SearchOption.AllDirectories );
 
@@ -447,7 +516,7 @@ namespace AssemblyInfoUtil
 					{   // Stop when we find one modified file.
                         string strFileModDateLocal = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTime );
                         string strFileModDateUTC = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTimeUtc );
-						Console.WriteLine ( $"Modified File {ArrayInfo.OrdinalFromIndex ( intJ )} of {intTotaslFiles}: {afiAllFilesInTree [ intJ ].FullName} modified {strFileModDateLocal} ({strFileModDateUTC} UTC), newer than AssemblyInfo.cs (modified {dtmAssemblyInfoModDate.ToString ( SysDateFormatters.RFD_YYYY_MM_DD_HH_MM_SS )} UTC)." );
+						Console.WriteLine ( $"Modified File {ArrayInfo.OrdinalFromIndex ( intJ )} of {intTotaslFiles}: {afiAllFilesInTree [ intJ ].FullName} modified {strFileModDateLocal} ({strFileModDateUTC} UTC), newer than AssemblyInfo.cs (modified {strAssemblyInfoUtcModDateForShow} UTC)." );
 						return true;
 					}   // if ( afiAllFilesInTree [ intJ ].LastAccessTimeUtc >= dtmAssemblyInfoModDate )
 				}   // for ( int intJ = ArrayInfo.ARRAY_FIRST_ELEMENT ; intJ < intTotaslFiles ; intJ++ )

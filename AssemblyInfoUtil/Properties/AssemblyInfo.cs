@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration ( "" )]
 [assembly: AssemblyCompany ( "David A. Gray, after Sergiy Korzh" )]
 [assembly: AssemblyProduct ( "AssemblyInfoUtil" )]
-[assembly: AssemblyCopyright ( "Copyright 2009, Sergiy Korzh, Portions Copyright 2019-2022, David A. Gray" )]
+[assembly: AssemblyCopyright ( "Copyright 2009, Sergiy Korzh, Portions Copyright 2019-2026, David A. Gray" )]
 [assembly: AssemblyTrademark ( "This software is distributed under the Code Project Open License." )]
 [assembly: AssemblyCulture ( "" )]
 
@@ -36,7 +36,7 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 
 [assembly: AssemblyVersion ( "3.9.0.0" )]
-[assembly: AssemblyFileVersion ( "3.9.0.0" )]
+[assembly: AssemblyFileVersion ( "3.9.101.0" )]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the

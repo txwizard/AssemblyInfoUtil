@@ -162,7 +162,7 @@ namespace AssemblyInfoUtil.Properties {
         /// <summary>
         ///   Looks up a localized string similar to {1}The copyright year is a single year: {0}{1}.
         /// </summary>
-        internal static string MSG_COPYRIGHT_YEAR_IS_SINGLE_YEAR {
+        internal static string MSG_SINGLE_COPYRIGHT_YEAR {
             get {
                 return ResourceManager.GetString("MSG_COPYRIGHT_YEAR_IS_SINGLE_YEAR", resourceCulture);
             }

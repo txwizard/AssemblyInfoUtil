@@ -8,7 +8,7 @@ namespace HelloWorld
 		{
 			UTL.ShowBOJMessage ( );
 
-			int intTime2Wait = 5;
+			int intTime2Wait = 10;
 			Console.WriteLine ( $"Pausing for {intTime2Wait} seconds" );
 			System.Threading.Thread.Sleep ( intTime2Wait * 1000 );
 			Console.WriteLine ( $"Paused for {intTime2Wait} seconds" );

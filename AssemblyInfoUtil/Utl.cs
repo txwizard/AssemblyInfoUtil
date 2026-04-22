@@ -106,9 +106,9 @@ namespace AssemblyInfoUtil
 				{
                     anTheApp.Name ,							// Format Item 0 = Program Name
 					fvi.ProductVersion ,                    // Format Item 1 = Program Version (Major, Minor, and Build), taken as the Product Version from the file version information
-                    s_dtmStart.ToLocalTime ( ) ,			// Format Item 3 = Local Startup Time
-					s_dtmStart ,							// Format Item 4 = UTC Startup Time
-					Environment.NewLine						// Format Item 5 = Embedded Newline
+                    s_dtmStart.ToLocalTime ( ) ,			// Format Item 2 = Local Startup Time
+					s_dtmStart ,							// Format Item 3 = UTC Startup Time
+					Environment.NewLine						// Format Item 4 = Embedded Newline
 				} );
         }   // public static string CreateStartupBanner
 

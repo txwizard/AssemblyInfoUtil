@@ -193,11 +193,14 @@
     <value>Done!</value>
     <comment>The main processing routine displays this message as it finished processing the input file.</comment>
   </data>
+  <data name="MSG_SINGLE_COPYRIGHT_YEAR" xml:space="preserve">
+    <value>{1}The copyright year is a single year: {0}{1}</value>
+  </data>
   <data name="MSG_SOURCE_UNCHANGED" xml:space="preserve">
     <value>{0}Since the project is unchanged, AssemblyInfo.cs remains unchanged and unexamined.{0}</value>
   </data>
   <data name="MSG_START" xml:space="preserve">
-    <value>{0}, version {1}.{2},{5}{3} ({4} UTC){5}</value>
+    <value>{0}, version {1}{4}{2} ({3} UTC){4}</value>
     <comment>The CreateStartupBanner method formats its message from this template.</comment>
   </data>
   <data name="MSG_STOP" xml:space="preserve">

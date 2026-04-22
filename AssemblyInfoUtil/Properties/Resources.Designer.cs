@@ -162,7 +162,7 @@ namespace AssemblyInfoUtil.Properties {
         /// <summary>
         ///   Looks up a localized string similar to {1}The copyright year is a single year: {0}{1}.
         /// </summary>
-        internal static string MSG_SINGLE_COPYRIGHT_YEAR {
+        internal static string MSG_COPYRIGHT_YEAR_IS_SINGLE_YEAR {
             get {
                 return ResourceManager.GetString("MSG_COPYRIGHT_YEAR_IS_SINGLE_YEAR", resourceCulture);
             }
@@ -259,6 +259,15 @@ namespace AssemblyInfoUtil.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {1}The copyright year is a single year: {0}{1}.
+        /// </summary>
+        internal static string MSG_SINGLE_COPYRIGHT_YEAR {
+            get {
+                return ResourceManager.GetString("MSG_SINGLE_COPYRIGHT_YEAR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0}Since the project is unchanged, AssemblyInfo.cs remains unchanged and unexamined.{0}.
         /// </summary>
         internal static string MSG_SOURCE_UNCHANGED {
@@ -268,7 +277,7 @@ namespace AssemblyInfoUtil.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}, version {1}.{2},{5}{3} ({4} UTC){5}.
+        ///   Looks up a localized string similar to {0}, version {1}{4}{2} ({3} UTC){4}.
         /// </summary>
         internal static string MSG_START {
             get {

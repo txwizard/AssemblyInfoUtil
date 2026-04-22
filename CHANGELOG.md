@@ -7,6 +7,13 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
+## 2026/04/22, version 3.9.103
+
+This is a hotfix release that addresses a minor issue that I discovered the
+first time I ran it in production. Ah, the hubris of a developer who has been
+working on a project for so long that he thinks he can get away with publishing
+a "harmless" one without testing it in production first.
+
 ## 2026/04/21, version 3.9.102
 
 This is a hotfix release that addresses a minor issue that I discovered in

@@ -126,6 +126,10 @@
                              directories such as those that hold build artifacts
                              that are identified by a list stored in the app
                              config file.
+
+    2026/04/18 3.9.102 DG Correct the code that checks time stamps to use the
+                          LastWriteTime property of the FileInfo object, rather
+                          than the volatile LastAccessTime. Oops!
     ============================================================================
 */
 
@@ -502,7 +506,7 @@ namespace AssemblyInfoUtil
 
 					if ( hsOK2Skip.Contains ( afiAllFilesInTree [ intJ ].Name ) )
                     {
-                        if ( afiAllFilesInTree [ intJ ].LastAccessTimeUtc >= dtmAssemblyInfoModDate )
+                        if ( afiAllFilesInTree [ intJ ].LastWriteTimeUtc >= dtmAssemblyInfoModDate )
                         {   // Note if modified.
 							string strFileModDateLocal = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTime );
 							string strFileModDateUTC = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTimeUtc );
@@ -512,7 +516,7 @@ namespace AssemblyInfoUtil
 						continue;       // Skip AMYWAY.
 					}   // if ( hsOK2Skip.Contains ( afiAllFilesInTree [ intJ ].Name ) )
 
-					if ( afiAllFilesInTree [ intJ ].LastAccessTimeUtc >= dtmAssemblyInfoModDate )
+					if ( afiAllFilesInTree [ intJ ].LastWriteTimeUtc >= dtmAssemblyInfoModDate )
 					{   // Stop when we find one modified file.
                         string strFileModDateLocal = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTime );
                         string strFileModDateUTC = SysDateFormatters.FormatDateTimeForShow ( afiAllFilesInTree [ intJ ].LastWriteTimeUtc );

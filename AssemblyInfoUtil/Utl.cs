@@ -26,11 +26,16 @@
 
     2022/07/10 3.6     DG Add a line break to the shutdown message so that there 
                           is always one in the output stream.
+
+    2026/04/21 3.9     DG Substitute the ProductVersion string for the version
+                          information in the startup banner because the assembly
+                          versions remains unchanged between major increments.
     ============================================================================
 */
 
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
@@ -91,16 +96,17 @@ namespace AssemblyInfoUtil
         /// </returns>
         public static string CreateStartupBanner ( )
         {
-            AssemblyName anTheApp = Assembly.GetEntryAssembly ( ).GetName ( );
+            Assembly asmThis = Assembly.GetEntryAssembly ( );
+			AssemblyName anTheApp = asmThis.GetName ( );
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo ( asmThis.Location );
 
             return string.Format (
                 Properties.Resources.MSG_START ,            // The format control string contains six substitution tokens.
                 new object [ ]								// Since there are more than three, the format items go into a parameter array.
 				{
                     anTheApp.Name ,							// Format Item 0 = Program Name
-					anTheApp.Version.Major ,				// Format Item 1 = Major Version Number
-					anTheApp.Version.Minor ,				// Format Item 2 = Minor Version Number
-					s_dtmStart.ToLocalTime ( ) ,			// Format Item 3 = Local Startup Time
+					fvi.ProductVersion ,                    // Format Item 1 = Program Version (Major, Minor, and Build), taken as the Product Version from the file version information
+                    s_dtmStart.ToLocalTime ( ) ,			// Format Item 3 = Local Startup Time
 					s_dtmStart ,							// Format Item 4 = UTC Startup Time
 					Environment.NewLine						// Format Item 5 = Embedded Newline
 				} );

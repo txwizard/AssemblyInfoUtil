@@ -7,6 +7,15 @@ with an article that he published on _The Code Project_.
 As I do with _every_ ChangeLog that I publish, revisions appear most recent
 first, so that the latest changes are visible without scrolling.
 
+## 2026/04/21, version 3.9.102
+
+This is a hotfix release that addresses a minor issue that I discovered in
+version 3.9.101.
+
+The program was checking LastAccessTimeUtc instead of LastWriteTimeUtc when
+comparing the last modified date of each relevant file against the last modified
+date of the project AssemblyInfo.cs file that was specified in the command line.
+
 ## 2026/04/20, version 3.9.101
 
 This is a hotfix release that addresses two minor issues that I discovered in version 3.9.
